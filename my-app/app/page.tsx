@@ -1,26 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-// 4 harfliden 10 harfliye kadar (her birinden 2'şer adet), toplam 14 soruluk sahte (mock) veri
-const MOCK_QUESTIONS = [
-  { hint: "Oturmaya yarayan eşya", answer: "MASA" },
-  { hint: "Bir mekana giriş yeri", answer: "KAPI" },
-  { hint: "Yazı yazma aracı", answer: "KALEM" },
-  { hint: "Duygusal bağ", answer: "SEVGİ" },
-  { hint: "Su içilen cam kap", answer: "BARDAK" },
-  { hint: "Kelime anlamlarını içeren kitap", answer: "SÖZLÜK" },
-  { hint: "Selamlaşma sözü", answer: "MERHABA" },
-  { hint: "Programlama", answer: "YAZILIM" },
-  { hint: "Haberleşme cihazının atası", answer: "TELGRAFC" }, // 8 Harfli uydurma/yakın
-  { hint: "Ağlar arası iletişim ağı", answer: "İNTERNET" }, 
-  { hint: "Kitapların bulunduğu yer", answer: "KÜTÜPHANE" },
-  { hint: "Uzaklık, mesafe gösteren astronomik birim", answer: "IŞIKYILI" }, // 9 Harfli
-  { hint: "Görüntülü iletişim aracı", answer: "TELEVİZYON" },
-  { hint: "Veri işleyen elektronik cihaz", answer: "BİLGİSAYAR" },
-];
+import { supabase } from "../lib/supabase";
 
 export default function GamePage() {
+  // Veri durumu state'leri
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   // State tanımlamaları
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -33,10 +20,51 @@ export default function GamePage() {
   const [userAnswer, setUserAnswer] = useState("");
   const [answerTimeLeft, setAnswerTimeLeft] = useState(20);
 
+  // Veri Çekme useEffect'i
+  useEffect(() => {
+    const fetchTodayQuestions = async () => {
+      try {
+        setIsLoading(true);
+        // Bugünün tarihini YYYY-MM-DD olarak alma (Yerel saat dilimine göre)
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        const dd = String(today.getDate()).padStart(2, "0");
+        const formattedDate = `${yyyy}-${mm}-${dd}`;
+
+        const { data, error } = await supabase
+          .from("questions")
+          .select("*")
+          .eq("game_date", formattedDate)
+          .limit(14);
+
+        if (error) {
+          console.error("Sorular alınırken hata:", error);
+          return;
+        }
+
+        if (data) {
+          // Gelen soruları cevap uzunluğuna göre sırala (4 harfliden 10 harfliye)
+          const sorted = data.sort((a, b) => a.answer.length - b.answer.length);
+          setQuestions(sorted);
+        }
+      } catch (err) {
+        console.error("Veri çekme işleminde hata oluştu:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTodayQuestions();
+  }, []);
+
   // Ana oyun sayacı (isAnswering aktif değilse saymaya devam eder)
   useEffect(() => {
     let timer: NodeJS.Timeout;
     
+    // Yükleme varsa sayaç başlamasın
+    if (isLoading || questions.length === 0) return;
+
     if (isGameActive && !isAnswering && timeLeft > 0) {
       timer = setInterval(() => {
         setTimeLeft((prev) => prev - 1);
@@ -46,7 +74,7 @@ export default function GamePage() {
     }
 
     return () => clearInterval(timer);
-  }, [isGameActive, isAnswering, timeLeft]);
+  }, [isGameActive, isAnswering, timeLeft, isLoading, questions.length]);
 
   // Cevaplama süresi 20 saniyeden geriye sayar
   useEffect(() => {
@@ -69,9 +97,11 @@ export default function GamePage() {
     setIsAnswering(false);
     setUserAnswer("");
     
+    if (questions.length === 0) return;
+
     // Tüm harflerin indekslerini doldur
     const allIndices = Array.from(
-      { length: MOCK_QUESTIONS[currentQuestionIndex].answer.length },
+      { length: questions[currentQuestionIndex].answer.length },
       (_, i) => i
     );
     setRevealedLetters(allIndices);
@@ -82,7 +112,7 @@ export default function GamePage() {
 
   // Sonraki soruya geçiş işlevini ortak bir fonksiyona aldım
   const handleNextQuestion = () => {
-    if (currentQuestionIndex < MOCK_QUESTIONS.length - 1) {
+    if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
       setRevealedLetters([]);
       setUserAnswer("");
@@ -96,14 +126,16 @@ export default function GamePage() {
 
   // Tüm harflerin açılıp açılmadığını kontrol eden useEffect
   useEffect(() => {
-    if (isGameActive && !isAnswering && revealedLetters.length === MOCK_QUESTIONS[currentQuestionIndex].answer.length) {
+    if (questions.length === 0) return;
+
+    if (isGameActive && !isAnswering && revealedLetters.length === questions[currentQuestionIndex].answer.length) {
       const timer = setTimeout(() => {
         handleNextQuestion();
       }, 2000);
 
       return () => clearTimeout(timer);
     }
-  }, [revealedLetters, currentQuestionIndex, isGameActive, isAnswering]);
+  }, [revealedLetters, currentQuestionIndex, isGameActive, isAnswering, questions]);
 
   // Süreyi formatlayan fonksiyon
   const formatTime = (seconds: number) => {
@@ -112,7 +144,32 @@ export default function GamePage() {
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  const currentQuestion = MOCK_QUESTIONS[currentQuestionIndex];
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+          <h2 className="text-xl sm:text-2xl font-semibold text-slate-700 font-sans tracking-wide">
+            Günün kelimeleri hazırlanıyor...
+          </h2>
+        </div>
+      </div>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6 sm:p-10 text-center">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-800">
+            Bugün için soru bulunamadı. Lütfen daha sonra tekrar deneyin.
+          </h2>
+        </div>
+      </div>
+    );
+  }
+
+  const currentQuestion = questions[currentQuestionIndex];
   
   // O anki sorunun alınabilecek (potansiyel) puanı (açılmayan harf sayısı * 100)
   const currentPotentialScore = (currentQuestion.answer.length - revealedLetters.length) * 100;
@@ -150,7 +207,7 @@ export default function GamePage() {
     e.preventDefault();
     if (!userAnswer.trim()) return;
 
-    // Türkçe karakterleri göz onünde bulundurarak küçük harfle kıyaslama yap
+    // Türkçe karakterleri göz önünde bulundurarak küçük harfle kıyaslama yap
     const isCorrect = userAnswer.toLocaleLowerCase("tr-TR") === currentQuestion.answer.toLocaleLowerCase("tr-TR");
     
     if (isCorrect) {
@@ -189,7 +246,7 @@ export default function GamePage() {
         {/* Orta Kısım: Soru İpucu */}
         <div className="mb-12 text-center">
           <div className="inline-block bg-indigo-100 text-indigo-800 font-semibold px-4 py-1 rounded-full text-sm mb-4">
-            Soru {currentQuestionIndex + 1} / {MOCK_QUESTIONS.length}
+            Soru {currentQuestionIndex + 1} / {questions.length}
           </div>
           <h2 className="text-xl sm:text-3xl font-medium text-slate-800 leading-relaxed">
             {currentQuestion.hint}
@@ -198,7 +255,7 @@ export default function GamePage() {
 
         {/* Soru Kutucukları (Harfler) */}
         <div className="flex justify-center gap-2 sm:gap-4 mb-12 flex-wrap">
-          {currentQuestion.answer.split("").map((letter, index) => {
+          {currentQuestion.answer.split("").map((letter: string, index: number) => {
             const isRevealed = revealedLetters.includes(index);
             return (
               <div
@@ -215,7 +272,7 @@ export default function GamePage() {
           })}
         </div>
 
-          {/* Alt Kısım: Butonlar veya Cevaplama Formu */}
+        {/* Alt Kısım: Butonlar veya Cevaplama Formu */}
         {!isAnswering ? (
           <div className="flex justify-center gap-4 sm:gap-6 border-t pt-8">
             <button 
