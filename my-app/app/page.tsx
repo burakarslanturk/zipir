@@ -25,18 +25,22 @@ export default function GamePage() {
     const fetchTodayQuestions = async () => {
       try {
         setIsLoading(true);
-        // Bugünün tarihini YYYY-MM-DD olarak alma (Yerel saat dilimine göre)
+        // Bugünün tarihini YYYY-MM-DD olarak alma (UTC - Tüm dünyada aynı anda güncellenir)
         const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, "0");
-        const dd = String(today.getDate()).padStart(2, "0");
+        const yyyy = today.getUTCFullYear();
+        const mm = String(today.getUTCMonth() + 1).padStart(2, "0");
+        const dd = String(today.getUTCDate()).padStart(2, "0");
         const formattedDate = `${yyyy}-${mm}-${dd}`;
+
+        console.log("Gönderilen Tarih:", formattedDate);
 
         const { data, error } = await supabase
           .from("questions")
           .select("*")
           .eq("game_date", formattedDate)
           .limit(14);
+
+        console.log("Supabase'den Dönen Data:", data);
 
         if (error) {
           console.error("Sorular alınırken hata:", error);
@@ -45,7 +49,7 @@ export default function GamePage() {
 
         if (data) {
           // Gelen soruları cevap uzunluğuna göre sırala (4 harfliden 10 harfliye)
-          const sorted = data.sort((a, b) => a.answer.length - b.answer.length);
+          const sorted = data.sort((a, b) => a.word.length - b.word.length);
           setQuestions(sorted);
         }
       } catch (err) {
@@ -101,7 +105,7 @@ export default function GamePage() {
 
     // Tüm harflerin indekslerini doldur
     const allIndices = Array.from(
-      { length: questions[currentQuestionIndex].answer.length },
+      { length: questions[currentQuestionIndex].word.length },
       (_, i) => i
     );
     setRevealedLetters(allIndices);
@@ -128,7 +132,7 @@ export default function GamePage() {
   useEffect(() => {
     if (questions.length === 0) return;
 
-    if (isGameActive && !isAnswering && revealedLetters.length === questions[currentQuestionIndex].answer.length) {
+    if (isGameActive && !isAnswering && revealedLetters.length === questions[currentQuestionIndex].word.length) {
       const timer = setTimeout(() => {
         handleNextQuestion();
       }, 2000);
@@ -172,13 +176,13 @@ export default function GamePage() {
   const currentQuestion = questions[currentQuestionIndex];
   
   // O anki sorunun alınabilecek (potansiyel) puanı (açılmayan harf sayısı * 100)
-  const currentPotentialScore = (currentQuestion.answer.length - revealedLetters.length) * 100;
+  const currentPotentialScore = (currentQuestion.word.length - revealedLetters.length) * 100;
 
   // Harf Alma Mantığı
   const handleGetLetter = () => {
     if (!isGameActive || isAnswering) return;
 
-    const answer = currentQuestion.answer;
+    const answer = currentQuestion.word;
     const unrevealedIndices: number[] = [];
     
     // Açılmamış harflerin indekslerini bul
@@ -197,7 +201,7 @@ export default function GamePage() {
 
   // Cevapla Butonuna Tıklanınca
   const handleAnswerClick = () => {
-    if (!isGameActive || revealedLetters.length === currentQuestion.answer.length) return;
+    if (!isGameActive || revealedLetters.length === currentQuestion.word.length) return;
     setIsAnswering(true);
     setAnswerTimeLeft(20);
   };
@@ -208,7 +212,7 @@ export default function GamePage() {
     if (!userAnswer.trim()) return;
 
     // Türkçe karakterleri göz önünde bulundurarak küçük harfle kıyaslama yap
-    const isCorrect = userAnswer.toLocaleLowerCase("tr-TR") === currentQuestion.answer.toLocaleLowerCase("tr-TR");
+    const isCorrect = userAnswer.toLocaleLowerCase("tr-TR") === currentQuestion.word.toLocaleLowerCase("tr-TR");
     
     if (isCorrect) {
       setScore((prev) => prev + currentPotentialScore);
@@ -249,13 +253,13 @@ export default function GamePage() {
             Soru {currentQuestionIndex + 1} / {questions.length}
           </div>
           <h2 className="text-xl sm:text-3xl font-medium text-slate-800 leading-relaxed">
-            {currentQuestion.hint}
+            {currentQuestion.clue}
           </h2>
         </div>
 
         {/* Soru Kutucukları (Harfler) */}
         <div className="flex justify-center gap-2 sm:gap-4 mb-12 flex-wrap">
-          {currentQuestion.answer.split("").map((letter: string, index: number) => {
+          {currentQuestion.word.split("").map((letter: string, index: number) => {
             const isRevealed = revealedLetters.includes(index);
             return (
               <div
@@ -277,14 +281,14 @@ export default function GamePage() {
           <div className="flex justify-center gap-4 sm:gap-6 border-t pt-8">
             <button 
               onClick={handleGetLetter}
-              disabled={!isGameActive || revealedLetters.length === currentQuestion.answer.length}
+              disabled={!isGameActive || revealedLetters.length === currentQuestion.word.length}
               className="flex-1 max-w-[200px] px-6 py-4 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-lg font-bold rounded-xl transition-colors shadow-md hover:shadow-lg active:scale-95"
             >
               Harf Al
             </button>
             <button 
               onClick={handleAnswerClick}
-              disabled={!isGameActive || revealedLetters.length === currentQuestion.answer.length}
+              disabled={!isGameActive || revealedLetters.length === currentQuestion.word.length}
               className="flex-1 max-w-[200px] px-6 py-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-lg font-bold rounded-xl transition-colors shadow-md hover:shadow-lg active:scale-95"
             >
               Cevapla
