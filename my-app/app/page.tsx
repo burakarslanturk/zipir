@@ -26,8 +26,32 @@ export default function GamePage() {
   const [isSavingScore, setIsSavingScore] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
+  const [showToast, setShowToast] = useState(false); // Kopyalandı bildirimi için
 
-  // Veri Çekme useEffect'i
+  const fetchLeaderboard = async (dateStr: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("leaderboard")
+        .select("*")
+        .eq("game_date", dateStr)
+        .order("score", { ascending: false })
+        .order("time_left", { ascending: false })
+        .limit(50);
+
+      if (error) {
+        console.error("Leaderboard çekilirken hata:", error);
+        return;
+      }
+      
+      if (data) {
+        setLeaderboardData(data);
+      }
+    } catch (err) {
+      console.error("Leaderboard hatası:", err);
+    }
+  };
+
+  // Veri Çekme ve LocalStorage Kontrolü useEffect'i
   useEffect(() => {
     const fetchTodayQuestions = async () => {
       try {
@@ -59,6 +83,40 @@ export default function GamePage() {
           const sorted = data.sort((a, b) => a.word.length - b.word.length);
           setQuestions(sorted);
         }
+
+        // LocalStorage Kontrolü ve Yükleme
+        const savedRaw = localStorage.getItem("kelime_oyunu_save");
+        if (savedRaw) {
+          try {
+            const savedState = JSON.parse(savedRaw);
+            // Sadece bugünün tarihi ise yükle, değilse yoksay
+            if (savedState.date === formattedDate) {
+              setScore(savedState.score ?? 0);
+              setTimeLeft(savedState.timeLeft ?? 240);
+              setCurrentQuestionIndex(savedState.currentQuestionIndex ?? 0);
+              setRevealedLetters(savedState.revealedLetters ?? []);
+              setNickname(savedState.nickname ?? "");
+              
+              // Eğer oyun daha önceden bitmişse (showLeaderboard = true ise)
+              if (savedState.showLeaderboard) {
+                setIsGameActive(false);
+                setShowLeaderboard(true);
+                fetchLeaderboard(formattedDate);
+              } 
+              // Eğer oynanırken yarım kalmışsa ve oyun bitmişse modal göster
+              else if (savedState.showGameOverModal) {
+                setIsGameActive(false);
+                setShowGameOverModal(true);
+              }
+              else {
+                setIsGameActive(savedState.isGameActive ?? true);
+              }
+            }
+          } catch (e) {
+            console.error("LocalStorage okunurken hata:", e);
+          }
+        }
+
       } catch (err) {
         console.error("Veri çekme işleminde hata oluştu:", err);
       } finally {
@@ -147,6 +205,32 @@ export default function GamePage() {
       return () => clearTimeout(timer);
     }
   }, [revealedLetters, currentQuestionIndex, isGameActive, isAnswering, questions]);
+
+  // Herhangi bir state değiştiğinde oyunu LocalStorage'a kaydetme
+  useEffect(() => {
+    // Sadece oyun yüklendikten (isLoading false olduktan) ve veriler geldikten sonra kaydet
+    if (isLoading || questions.length === 0) return;
+
+    const today = new Date();
+    const yyyy = today.getUTCFullYear();
+    const mm = String(today.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(today.getUTCDate()).padStart(2, "0");
+    const formattedDate = `${yyyy}-${mm}-${dd}`;
+
+    const gameState = {
+      date: formattedDate,
+      score,
+      timeLeft,
+      currentQuestionIndex,
+      revealedLetters,
+      isGameActive,
+      showGameOverModal,
+      showLeaderboard,
+      nickname
+    };
+
+    localStorage.setItem("kelime_oyunu_save", JSON.stringify(gameState));
+  }, [score, timeLeft, currentQuestionIndex, revealedLetters, isGameActive, showGameOverModal, showLeaderboard, nickname, isLoading, questions.length]);
 
   // Oyun bitiş kontrolü
   useEffect(() => {
@@ -238,35 +322,6 @@ export default function GamePage() {
     }
   };
 
-  const fetchLeaderboard = async () => {
-    try {
-      const today = new Date();
-      const yyyy = today.getUTCFullYear();
-      const mm = String(today.getUTCMonth() + 1).padStart(2, "0");
-      const dd = String(today.getUTCDate()).padStart(2, "0");
-      const formattedDate = `${yyyy}-${mm}-${dd}`;
-
-      const { data, error } = await supabase
-        .from("leaderboard")
-        .select("*")
-        .eq("game_date", formattedDate)
-        .order("score", { ascending: false })
-        .order("time_left", { ascending: false })
-        .limit(50);
-
-      if (error) {
-        console.error("Leaderboard çekilirken hata:", error);
-        return;
-      }
-      
-      if (data) {
-        setLeaderboardData(data);
-      }
-    } catch (err) {
-      console.error("Leaderboard hatası:", err);
-    }
-  };
-
   const handleSaveScore = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nickname.trim()) return;
@@ -296,7 +351,7 @@ export default function GamePage() {
       }
 
       setShowGameOverModal(false);
-      await fetchLeaderboard();
+      await fetchLeaderboard(formattedDate);
       setShowLeaderboard(true);
     } catch (err) {
       console.error("Kaydetme işlemi sırasında bir sorun oluştu:", err);
@@ -305,8 +360,31 @@ export default function GamePage() {
     }
   };
 
+  const handleShareResult = async () => {
+    const today = new Date();
+    const formattedDate = `${today.getDate().toString().padStart(2, "0")}.${(today.getMonth() + 1).toString().padStart(2, "0")}.${today.getFullYear()}`;
+    const playUrl = window.location.origin;
+
+    const shareText = `🟩 Günlük Kelime Oyunu\n📅 ${formattedDate}\n🎯 Puan: ${score}\n⏱️ Artan Süre: ${timeLeft} sn\n🔗 Oynamak için: ${playUrl}`;
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2500);
+    } catch (err) {
+      console.error("Panoya kopyalanamadı:", err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+      {/* Kopyalandı Bildirimi (Toast) */}
+      {showToast && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-green-500 text-white font-bold px-6 py-3 rounded-xl shadow-2xl z-50 animate-bounce">
+          ✓ Sonuç Panoya Kopyalandı!
+        </div>
+      )}
+
       {showLeaderboard ? (
         <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6 sm:p-10">
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-6 text-center border-b pb-4">
@@ -338,13 +416,14 @@ export default function GamePage() {
               </table>
             </div>
           )}
-          <div className="mt-8 flex justify-center">
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button 
-              onClick={() => window.location.reload()} 
-              className="px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-xl transition-colors"
+              onClick={handleShareResult}
+              className="px-8 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition-colors shadow-lg hover:shadow-xl active:scale-95 flex items-center gap-2"
             >
-              Tekrar Oyna
+              <span>🔗 Sonucu Paylaş</span>
             </button>
+            <p className="text-sm font-medium text-slate-400 mt-2 sm:mt-0 text-center">Yarın yeni kelimelerle görüşmek üzere!</p>
           </div>
         </div>
       ) : (
