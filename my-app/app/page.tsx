@@ -695,9 +695,9 @@ export default function GamePage() {
                       type="text"
                       autoFocus
                       value={userAnswer}
-                      onChange={(e) => setUserAnswer(e.target.value)}
+                      onChange={(e) => setUserAnswer(e.target.value.toLocaleUpperCase('tr-TR'))}
                       placeholder="Cevabınızı girin..."
-                      className="flex-1 px-5 py-4 border-2 border-violet-200 bg-violet-50/50 rounded-xl focus:outline-none focus:border-violet-500 focus:bg-white text-lg lg:text-xl uppercase font-bold text-center sm:text-left transition-colors"
+                      className="flex-1 px-5 py-4 border-2 border-violet-200 bg-violet-50/50 rounded-xl focus:outline-none focus:border-violet-500 focus:bg-white text-lg lg:text-xl font-bold text-center sm:text-left transition-colors"
                     />
                     <button 
                       type="submit"
