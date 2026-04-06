@@ -36,11 +36,11 @@ function NextGameTimer() {
   }, []);
 
   return (
-    <div className="mt-8 p-6 bg-violet-50 border border-violet-100 rounded-2xl shadow-sm text-center w-full max-w-sm mx-auto">
-      <p className="text-sm font-semibold text-slate-600 mb-2">
-        Bir sonraki ZIPIR'a kalan süre:
+    <div className="flex flex-col items-start px-2">
+      <p className="text-xs font-semibold text-slate-500 mb-0.5 tracking-wider uppercase">
+        YENİ OYUNA KALAN SÜRE
       </p>
-      <div className="text-4xl font-black text-violet-600 font-mono tracking-widest">
+      <div className="text-xl sm:text-2xl font-bold text-violet-600 font-mono tracking-tight">
         {timeLeftStr}
       </div>
     </div>
@@ -86,7 +86,8 @@ export default function GamePage() {
   const [isSavingScore, setIsSavingScore] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
-  const [showToast, setShowToast] = useState(false); // Kopyalandı bildirimi için
+  const [showToast, setShowToast] = useState(false); // Kopyalandı bildirimi için (genel)
+  const [isCopied, setIsCopied] = useState(false); // Sadece leaderboard'daki buton için lokal toolitp
 
   const fetchLeaderboard = async (dateStr: string) => {
     try {
@@ -614,8 +615,8 @@ export default function GamePage() {
 
     try {
       await navigator.clipboard.writeText(shareText);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 2500);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
       console.error("Panoya kopyalanamadı:", err);
     }
@@ -641,13 +642,13 @@ export default function GamePage() {
             {leaderboardData.length === 0 ? (
               <p className="text-slate-500 py-8">Henüz bir skor kaydedilmemiş.</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
+              <div className="w-full max-h-64 overflow-y-auto pr-2 overflow-x-auto">
+                <table className="w-full text-left border-collapse cursor-default">
+                  <thead className="sticky top-0 z-10 bg-white">
                     <tr className="bg-violet-50 text-violet-800">
                       <th className="py-3 px-4 rounded-tl-lg font-semibold">#</th>
                       <th className="py-3 px-4 font-semibold">Oyuncu</th>
-                      <th className="py-3 px-4 font-semibold">Puan</th>
+                      <th className="py-3 px-4 font-semibold text-center">Puan</th>
                       <th className="py-3 px-4 rounded-tr-lg font-semibold text-right">Süre</th>
                     </tr>
                   </thead>
@@ -656,7 +657,7 @@ export default function GamePage() {
                       <tr key={idx} className="border-b border-slate-50 last:border-none hover:bg-slate-50 transition-colors">
                         <td className="py-3 px-4 text-slate-500 font-medium">{idx + 1}</td>
                         <td className="py-3 px-4 font-bold text-slate-700">{item.nickname}</td>
-                        <td className="py-3 px-4 font-black text-violet-600">{item.score}</td>
+                        <td className="py-3 px-4 font-black text-violet-600 text-center">{item.score}</td>
                         <td className="py-3 px-4 font-mono text-slate-500 text-right">{item.time_left} sn</td>
                       </tr>
                     ))}
@@ -665,15 +666,23 @@ export default function GamePage() {
               </div>
             )}
             
-            <div className="flex flex-col items-center gap-6 mt-8">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 pt-5 border-t border-slate-100">
               <NextGameTimer />
               
-              <button 
-                onClick={handleShareResult}
-                className="px-8 py-4 bg-slate-800 text-white text-lg font-bold rounded-xl shadow-md hover:bg-slate-700 transition-all font-sans w-full max-w-sm"
-              >
-                Sonucumu Paylaş
-              </button>
+              <div className="relative flex items-center">
+                {isCopied && (
+                  <div className="absolute right-full mr-3 whitespace-nowrap bg-slate-800 text-white text-xs px-2.5 py-1.5 rounded-md shadow-md animate-in fade-in zoom-in duration-200">
+                    Panoya kopyalandı!
+                    <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 border-y-[5px] border-y-transparent border-l-[5px] border-l-slate-800"></div>
+                  </div>
+                )}
+                <button 
+                  onClick={handleShareResult}
+                  className="w-full sm:w-auto px-5 py-2.5 bg-violet-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-violet-700 active:scale-95 transition-all outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+                >
+                  Sonucumu Paylaş
+                </button>
+              </div>
             </div>
           </div>
         </div>
