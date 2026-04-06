@@ -394,8 +394,8 @@ export default function GamePage() {
         
         {/* 1. Marka Alanı */}
         <div className="flex flex-col items-center text-center">
-          <h1 className="text-4xl sm:text-5xl font-black text-violet-600 tracking-tight drop-shadow-sm">
-            ZIPIR
+          <h1 className="text-4xl sm:text-5xl font-nunito font-black tracking-tight text-violet-600 drop-shadow-sm">
+            ZIPIR<span className="text-violet-400 italic">!</span>
           </h1>
           <p className="mt-1.5 text-base sm:text-lg text-slate-500 font-light tracking-wide">
             Günlük Kelime Bulmaca Oyunu
@@ -740,9 +740,9 @@ export default function GamePage() {
           <header className={`w-full max-w-4xl mx-auto px-4 py-8 relative flex items-center justify-between ${showGameOverModal ? 'blur-sm' : ''}`}>
             {/* Sol: Logo */}
             <div className="flex-1 flex justify-start">
-              <div className="text-4xl sm:text-5xl font-black text-violet-500 tracking-tight">
-                ZIPIR
-              </div>
+              <h1 className="text-4xl sm:text-5xl font-nunito font-black tracking-tight text-violet-600">
+                ZIPIR<span className="text-violet-400 italic">!</span>
+              </h1>
             </div>
 
             {/* Sağ: Puan */}
@@ -787,8 +787,8 @@ export default function GamePage() {
 
               {/* Soru / İpucu Metni */}
               <div className="mt-8 mb-10 w-full text-center">
-                <h2 className="text-2xl sm:text-3xl font-serif italic text-slate-700 leading-snug">
-                  "{currentQuestion.clue}"
+                <h2 className="text-xl sm:text-2xl font-sans text-slate-700 leading-relaxed max-w-2xl mx-auto">
+                  {currentQuestion.clue}
                 </h2>
               </div>
 
