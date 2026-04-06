@@ -25,6 +25,7 @@ export default function GamePage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const [showWarningToast, setShowWarningToast] = useState(false);
+  const [answerStatus, setAnswerStatus] = useState<"idle" | "correct" | "wrong">("idle");
 
   // Oyun Sonu & Leaderboard State'leri
   const [showGameOverModal, setShowGameOverModal] = useState(false);
@@ -162,54 +163,81 @@ export default function GamePage() {
         setAnswerTimeLeft((prev) => prev - 1);
       }, 1000);
     } else if (isAnswering && answerTimeLeft <= 0) {
-      // Süre bittiğinde ceza puanı hesapla ve düş (Zaman aşımı cezası)
       if (questions.length > 0 && currentQuestionIndex < questions.length) {
         const penalty = (questions[currentQuestionIndex].word.length - revealedLetters.length) * 100;
-        setScore((prev) => prev - penalty);
+        handleWrongAnswer(penalty, true);
       }
-      // Harfleri aç ve bekleme mantığını tetikle
-      revealAllAndProceed();
     }
 
     return () => clearInterval(timer);
   }, [isAnswering, answerTimeLeft, questions, currentQuestionIndex, revealedLetters.length]);
 
-  // Yanlış cevap veya süre bittiğinde tüm kelimeyi açıp 2 sn beklettiğimiz fonksiyon
-  const revealAllAndProceed = () => {
-    setIsAnswering(false);
-    setUserAnswer("");
-    
-    if (questions.length === 0) return;
-
-    // Tüm harflerin indekslerini doldur
-    const allIndices = Array.from(
-      { length: questions[currentQuestionIndex].word.length },
-      (_, i) => i
-    );
-    setRevealedLetters(allIndices);
-  };
+  const currentQuestionWord = questions.length > 0 ? questions[currentQuestionIndex]?.word : "";
 
   // Sonraki soruya geçiş işlevini ortak bir fonksiyona aldım
   const handleNextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1);
+    setCurrentQuestionIndex((prev) => {
       setRevealedLetters([]);
       setUserAnswer("");
       setIsAnswering(false);
       setAnswerTimeLeft(20);
       setIsTransitioning(false); // Yeni soruya geçildi, süreyi tekrar akıtmaya başla
-    } else {
-      setIsGameActive(false);
-      setIsAnswering(false);
-      setIsTransitioning(false); // Oyun bitti
-    }
+      setAnswerStatus("idle");
+      
+      if (prev < questions.length - 1) {
+        return prev + 1;
+      } else {
+        setIsGameActive(false); // Oyun bitti
+        return prev;
+      }
+    });
   };
 
-  // Tüm harflerin açılıp açılmadığını kontrol eden useEffect
+  // Yanlış cevap veya süre bittiğinde tetiklenecek fonksiyon (Aşama 1 ve Aşama 2)
+  const handleWrongAnswer = (penalty: number, isTimeout: boolean = false) => {
+    setIsAnswering(false);
+    setIsTransitioning(true);
+    setScore((prev) => prev - penalty);
+    setAnswerStatus("wrong");
+
+    // Aşama 2: 1.5 saniye yanlış girdiyi/süreyi gösterdikten sonra doğru cevabı göster
+    setTimeout(() => {
+      setAnswerStatus("idle"); 
+      setUserAnswer("");
+      
+      setRevealedLetters((prevRevealed) => {
+        // Eğer indexler kelime uzunluğu kadar değilse, doldur
+        const allIndices = Array.from({ length: currentQuestionWord.length }, (_, i) => i);
+        return allIndices;
+      });
+      
+      // Aşama 3: 1.5 saniye sonra da yeni soruya geç
+      setTimeout(() => {
+        handleNextQuestion();
+      }, 1500);
+    }, 1500);
+  };
+
+  // Doğru cevap verildiğinde tetiklenecek fonksiyon (Aşama 1 ve Yeni Soru)
+  const handleCorrectAnswer = (reward: number) => {
+    setIsAnswering(false);
+    setIsTransitioning(true);
+    setScore((prev) => prev + reward);
+    setAnswerStatus("correct");
+    
+    setRevealedLetters((prevRevealed) => Array.from({ length: currentQuestionWord.length }, (_, i) => i));
+
+    setTimeout(() => {
+      handleNextQuestion();
+    }, 1500);
+  };
+
+  // Tüm harflerin açılıp açılmadığını (ipucu yardımıyla vs) kontrol eden useEffect
+  // handleCorrectAnswer ve handleWrongAnswer çalışırken zaten manuel setTimeout kurduğumuz için burada çakışmasını önledik.
   useEffect(() => {
     if (questions.length === 0 || !hasStarted) return;
 
-    if (isGameActive && !isAnswering && revealedLetters.length === questions[currentQuestionIndex].word.length) {
+    if (isGameActive && answerStatus === "idle" && !isAnswering && currentQuestionWord && revealedLetters.length === currentQuestionWord.length) {
       setIsTransitioning(true); // Geri sayımı bu esnada durdur
       const timer = setTimeout(() => {
         handleNextQuestion();
@@ -470,11 +498,10 @@ export default function GamePage() {
     const isCorrect = fullWord.toLocaleLowerCase("tr-TR") === currentQuestion.word.toLocaleLowerCase("tr-TR");
     
     if (isCorrect) {
-      setScore((prev) => prev + currentPotentialScore);
+      handleCorrectAnswer(currentPotentialScore);
     } else {
-      setScore((prev) => prev - currentPotentialScore); // Yanlış cevap cezası
+      handleWrongAnswer(currentPotentialScore, false);
     }
-    revealAllAndProceed();
   };
 
   const handleSaveScore = async (e: React.FormEvent) => {
@@ -694,7 +721,7 @@ export default function GamePage() {
 
               {/* Harf Kutuları */}
               <div 
-                className={`flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10 cursor-text ${isShaking ? "animate-shake" : ""}`}
+                className={`flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10 cursor-text ${isShaking || answerStatus === "wrong" ? "animate-shake" : ""}`}
                 onClick={() => {
                   if (isAnswering) document.getElementById('hidden-answer-input')?.focus();
                 }}
@@ -708,33 +735,37 @@ export default function GamePage() {
                     let isActiveBox = false;
 
                     if (isRevealed) {
-                      displayChar = letter; // Sistem açtığı harfler
+                      displayChar = letter; // Sistem açtığı veya Doğru kelime
                     } else {
-                      if (isAnswering) {
-                        // Kullanıcının girdiği harfleri sırasıyla boş kutulara yerleştiriyoruz
-                        if (typedIndexCounter < userAnswer.length) {
-                          displayChar = userAnswer[typedIndexCounter];
-                          isUserTyped = true;
-                        } else if (typedIndexCounter === userAnswer.length) {
-                          // Bu kutu bir sonraki yazılacak kutu
-                          isActiveBox = true;
-                        }
+                      // isAnswering false olsa bile (yanlış kelimenin gösterildiği bekleme anında) user girdisini korumak için
+                      if (typedIndexCounter < userAnswer.length) {
+                        displayChar = userAnswer[typedIndexCounter];
+                        isUserTyped = true;
+                      } else if (isAnswering && typedIndexCounter === userAnswer.length) {
+                        // Bu kutu bir sonraki yazılacak kutu
+                        isActiveBox = true;
                       }
                       typedIndexCounter++;
+                    }
+
+                    // Stil Katmanları
+                    let boxStyle = "bg-slate-50 border-slate-200 text-transparent"; // Boş normal kutu
+                    if (answerStatus === "correct" && isRevealed) {
+                      boxStyle = "bg-emerald-50 border-emerald-500 text-emerald-700 shadow-md transform -translate-y-1 transition-all duration-300";
+                    } else if (answerStatus === "wrong" && isUserTyped) {
+                      boxStyle = "bg-red-50 border-red-500 text-red-700 shadow-md";
+                    } else if (isRevealed) {
+                      boxStyle = "bg-violet-50 border-violet-200 text-violet-700 shadow-sm"; // Sistem İpucu Harfi
+                    } else if (isUserTyped) {
+                      boxStyle = "bg-white border-violet-500 text-violet-700 shadow-md transform -translate-y-1"; // Kullanıcı Girdisi
+                    } else if (isAnswering && isActiveBox) {
+                      boxStyle = "bg-violet-50/50 border-violet-400 shadow-inner ring-4 ring-violet-200/50"; // Odaklanılan
                     }
 
                     return (
                       <div
                         key={index}
-                        className={`relative w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl border-2 text-2xl sm:text-3xl font-bold uppercase transition-all duration-300
-                          ${isRevealed 
-                            ? "bg-violet-50 border-violet-200 text-violet-700 shadow-sm" // Sistem İpucu Harfi
-                            : isUserTyped
-                              ? "bg-white border-violet-500 text-violet-700 shadow-md transform -translate-y-1" // Kullanıcı Girdisi Harf
-                              : (isAnswering && isActiveBox)
-                                ? "bg-violet-50/50 border-violet-400 shadow-inner ring-4 ring-violet-200/50" // Odaklanılan (Sıradaki) Kutu
-                                : "bg-slate-50 border-slate-200 text-transparent" // Boş normal kutu
-                          }`}
+                        className={`relative w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl border-2 text-2xl sm:text-3xl font-bold uppercase transition-all duration-300 ${boxStyle}`}
                       >
                         {displayChar}
                         {/* Aktif kutudayken küçük bir imleç işareti göster */}
