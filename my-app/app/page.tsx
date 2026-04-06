@@ -242,9 +242,11 @@ export default function GamePage() {
     setIsTransitioning(true);
     setScore((prev) => prev - penalty);
     setAnswerStatus("wrong");
+    setIsShaking(true);
 
     // Aşama 2: 1.5 saniye yanlış girdiyi/süreyi gösterdikten sonra doğru cevabı göster
     setTimeout(() => {
+      setIsShaking(false);
       setAnswerStatus("idle"); 
       setUserAnswer("");
       
@@ -804,7 +806,7 @@ export default function GamePage() {
                     let boxStyle = "bg-slate-50 border-slate-200 text-transparent"; // Boş normal kutu
                     if (answerStatus === "correct" && isRevealed) {
                       boxStyle = "bg-emerald-50 border-emerald-500 text-emerald-700 shadow-md transform -translate-y-1 transition-all duration-300";
-                    } else if (answerStatus === "wrong" && isUserTyped) {
+                    } else if (answerStatus === "wrong" && !isRevealed) {
                       boxStyle = "bg-red-50 border-red-500 text-red-700 shadow-md";
                     } else if (isRevealed) {
                       boxStyle = "bg-violet-50 border-violet-200 text-violet-700 shadow-sm"; // Sistem İpucu Harfi
