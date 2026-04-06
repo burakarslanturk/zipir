@@ -240,6 +240,27 @@ export default function GamePage() {
     }
   }, [isGameActive, questions.length, showLeaderboard]);
 
+  // Klavye (Space) ile 'Cevapla' butonunu tetikleme
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Sadece oyun aktifken, olay sayfa üzerindeyken (input vs içinde değilsek ekstra kontrol eklenebilir ama şu anki yapıya uygun) ve boşluk tuşuna basıldığında
+      if (e.code === "Space" && isGameActive && !isAnswering) {
+        // Tüm harfler açılmışsa 'Cevapla' butonunun çalışmadığı gibi burada da çalışmamalı
+        if (questions.length > 0 && currentQuestionIndex < questions.length) {
+           const currentWordLength = questions[currentQuestionIndex].word.length;
+           if (revealedLetters.length !== currentWordLength) {
+             e.preventDefault(); // Sayfanın kaymasını kesinlikle engelle
+             setIsAnswering(true);
+             setAnswerTimeLeft(20);
+           }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isGameActive, isAnswering, questions, currentQuestionIndex, revealedLetters.length]);
+
   // Süreyi formatlayan fonksiyon
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
