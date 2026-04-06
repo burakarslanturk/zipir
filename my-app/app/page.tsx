@@ -372,7 +372,20 @@ export default function GamePage() {
               </div>
               <div className="pt-0.5">
                 <p className="text-slate-600 font-medium text-sm sm:text-base leading-tight">
-                  Tahminde bulunmak için <strong className="text-slate-800">"Cevapla"</strong> butonuna tıklanmalıdır. Tıkladığınızda ana süre durur ve <strong className="text-emerald-600">20 saniyelik cevaplama süresi</strong> işler.
+                  <strong className="text-slate-800">"Cevapla"</strong> dedikten sonra ana süre durur, <strong className="text-emerald-600">20 saniyelik cevaplama süreniz</strong> başlar ve tüm boş harfleri doldurmanız zorunludur.
+                </p>
+              </div>
+            </li>
+
+            <li className="flex items-start gap-3">
+              <div className="flex-shrink-0 bg-red-100 text-red-600 p-2 sm:p-2.5 rounded-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+              </div>
+              <div className="pt-0.5">
+                <p className="text-slate-600 font-medium text-sm sm:text-base leading-tight">
+                  <strong className="text-slate-800">Dikkat:</strong> Yanlış tahmin yaparsanız veya süreniz biterse o an alınabilecek puan <strong className="text-red-600">eksi puan (-)</strong> olarak hanenize yansır.
                 </p>
               </div>
             </li>
