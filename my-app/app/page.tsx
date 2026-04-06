@@ -160,12 +160,17 @@ export default function GamePage() {
         setAnswerTimeLeft((prev) => prev - 1);
       }, 1000);
     } else if (isAnswering && answerTimeLeft <= 0) {
-      // Süre bittiğinde harfleri aç ve bekleme mantığını tetikle
+      // Süre bittiğinde ceza puanı hesapla ve düş (Zaman aşımı cezası)
+      if (questions.length > 0 && currentQuestionIndex < questions.length) {
+        const penalty = (questions[currentQuestionIndex].word.length - revealedLetters.length) * 100;
+        setScore((prev) => prev - penalty);
+      }
+      // Harfleri aç ve bekleme mantığını tetikle
       revealAllAndProceed();
     }
 
     return () => clearInterval(timer);
-  }, [isAnswering, answerTimeLeft]);
+  }, [isAnswering, answerTimeLeft, questions, currentQuestionIndex, revealedLetters.length]);
 
   // Yanlış cevap veya süre bittiğinde tüm kelimeyi açıp 2 sn beklettiğimiz fonksiyon
   const revealAllAndProceed = () => {
@@ -426,10 +431,10 @@ export default function GamePage() {
     
     if (isCorrect) {
       setScore((prev) => prev + currentPotentialScore);
-      revealAllAndProceed();
     } else {
-      revealAllAndProceed();
+      setScore((prev) => prev - currentPotentialScore); // Yanlış cevap cezası
     }
+    revealAllAndProceed();
   };
 
   const handleSaveScore = async (e: React.FormEvent) => {
