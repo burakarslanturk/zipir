@@ -3,6 +3,50 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 
+function NextGameTimer() {
+  const [timeLeftStr, setTimeLeftStr] = useState<string>("--:--:--");
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date();
+      const nextMidnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+      const diffMs = nextMidnight.getTime() - now.getTime();
+
+      if (diffMs <= 0) {
+        return "00:00:00";
+      }
+
+      const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diffMs / (1000 * 60)) % 60);
+      const seconds = Math.floor((diffMs / 1000) % 60);
+
+      const hh = String(hours).padStart(2, "0");
+      const mm = String(minutes).padStart(2, "0");
+      const ss = String(seconds).padStart(2, "0");
+
+      return `${hh}:${mm}:${ss}`;
+    };
+
+    setTimeLeftStr(calculateTimeLeft());
+    const interval = setInterval(() => {
+      setTimeLeftStr(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="mt-8 p-6 bg-violet-50 border border-violet-100 rounded-2xl shadow-sm text-center w-full max-w-sm mx-auto">
+      <p className="text-sm font-semibold text-slate-600 mb-2">
+        Bir sonraki ZIPIR'a kalan süre:
+      </p>
+      <div className="text-4xl font-black text-violet-600 font-mono tracking-widest">
+        {timeLeftStr}
+      </div>
+    </div>
+  );
+}
+
 export default function GamePage() {
   // Splash ve oyun başlatma kontrolü
   const [hasStarted, setHasStarted] = useState(false);
@@ -602,12 +646,16 @@ export default function GamePage() {
               </div>
             )}
             
-            <button 
-              onClick={handleShareResult}
-              className="mt-8 px-8 py-3 bg-slate-800 text-white font-bold rounded-xl shadow-md hover:bg-slate-700 transition-all font-sans"
-            >
-              Sonucumu Paylaş
-            </button>
+            <div className="flex flex-col items-center gap-6 mt-8">
+              <NextGameTimer />
+              
+              <button 
+                onClick={handleShareResult}
+                className="px-8 py-4 bg-slate-800 text-white text-lg font-bold rounded-xl shadow-md hover:bg-slate-700 transition-all font-sans w-full max-w-sm"
+              >
+                Sonucumu Paylaş
+              </button>
+            </div>
           </div>
         </div>
       ) : (
