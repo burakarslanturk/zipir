@@ -63,15 +63,11 @@ export default function GamePage() {
         const dd = String(today.getUTCDate()).padStart(2, "0");
         const formattedDate = `${yyyy}-${mm}-${dd}`;
 
-        console.log("Gönderilen Tarih:", formattedDate);
-
         const { data, error } = await supabase
           .from("questions")
           .select("*")
           .eq("game_date", formattedDate)
           .limit(14);
-
-        console.log("Supabase'den Dönen Data:", data);
 
         if (error) {
           console.error("Sorular alınırken hata:", error);
@@ -174,9 +170,6 @@ export default function GamePage() {
       (_, i) => i
     );
     setRevealedLetters(allIndices);
-
-    // Not: revealedLetters tam dolduğu için alttaki tüm harfler açıldı useEffect'i otomatik devreye girecek
-    // ve 2 saniye sonra handleNextQuestion() fonksiyonunu kendisi çağıracaktır.
   };
 
   // Sonraki soruya geçiş işlevini ortak bir fonksiyona aldım
@@ -208,7 +201,6 @@ export default function GamePage() {
 
   // Herhangi bir state değiştiğinde oyunu LocalStorage'a kaydetme
   useEffect(() => {
-    // Sadece oyun yüklendikten (isLoading false olduktan) ve veriler geldikten sonra kaydet
     if (isLoading || questions.length === 0) return;
 
     const today = new Date();
@@ -250,8 +242,8 @@ export default function GamePage() {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-          <h2 className="text-xl sm:text-2xl font-semibold text-slate-700 font-sans tracking-wide">
+          <div className="w-16 h-16 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin"></div>
+          <h2 className="text-xl font-semibold text-slate-700 tracking-wide">
             Günün kelimeleri hazırlanıyor...
           </h2>
         </div>
@@ -262,8 +254,8 @@ export default function GamePage() {
   if (questions.length === 0) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6 sm:p-10 text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-800">
+        <div className="w-full max-w-3xl bg-white rounded-2xl shadow-sm p-6 sm:p-10 text-center border border-slate-100">
+          <h2 className="text-xl font-bold text-slate-800">
             Bugün için soru bulunamadı. Lütfen daha sonra tekrar deneyin.
           </h2>
         </div>
@@ -272,8 +264,7 @@ export default function GamePage() {
   }
 
   const currentQuestion = questions[currentQuestionIndex];
-  
-  // O anki sorunun alınabilecek (potansiyel) puanı (açılmayan harf sayısı * 100)
+  // O anki sorunun alınabilecek (potansiyel) puanı
   const currentPotentialScore = (currentQuestion.word.length - revealedLetters.length) * 100;
 
   // Harf Alma Mantığı
@@ -290,7 +281,6 @@ export default function GamePage() {
       }
     }
 
-    // Açılacak harf kaldıysa (kelimenin tamamı açılmadıysa) rastgele birini aç
     if (unrevealedIndices.length > 0) {
       const randomIndex = unrevealedIndices[Math.floor(Math.random() * unrevealedIndices.length)];
       setRevealedLetters((prev) => [...prev, randomIndex]);
@@ -304,20 +294,17 @@ export default function GamePage() {
     setAnswerTimeLeft(20);
   };
 
-  // Cevabı Gönderme (Submit) 
+  // Cevabı Gönderme
   const handleSubmitAnswer = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userAnswer.trim()) return;
 
-    // Türkçe karakterleri göz önünde bulundurarak küçük harfle kıyaslama yap
     const isCorrect = userAnswer.toLocaleLowerCase("tr-TR") === currentQuestion.word.toLocaleLowerCase("tr-TR");
     
     if (isCorrect) {
       setScore((prev) => prev + currentPotentialScore);
-      // Doğru bilince hem kelimeyi tamamlayıp göstersin hem de 2 saniye beklerken puan da eklenmiş olsun 
       revealAllAndProceed();
     } else {
-      // Yanlış cevap durumunda da süre ve puan verilmeden kelime açılıp geçilecek
       revealAllAndProceed();
     }
   };
@@ -377,188 +364,230 @@ export default function GamePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-      {/* Kopyalandı Bildirimi (Toast) */}
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
+      
+      {/* Kopyalandı Bildirimi */}
       {showToast && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-green-500 text-white font-bold px-6 py-3 rounded-xl shadow-2xl z-50 animate-bounce">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white font-medium px-6 py-3 rounded-full shadow-lg z-50 animate-bounce">
           ✓ Sonuç Panoya Kopyalandı!
         </div>
       )}
 
+      {/* Liderlik Tablosu Görünümü */}
       {showLeaderboard ? (
-        <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6 sm:p-10">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-6 text-center border-b pb-4">
-            🏆 Bugünün Liderlik Tablosu
-          </h2>
-          {leaderboardData.length === 0 ? (
-            <p className="text-center text-slate-500 text-lg py-8">Henüz bir skor kaydedilmemiş.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-indigo-50 text-indigo-800">
-                    <th className="py-3 px-4 rounded-tl-lg font-semibold">#</th>
-                    <th className="py-3 px-4 font-semibold">Takma Ad</th>
-                    <th className="py-3 px-4 font-semibold">Puan</th>
-                    <th className="py-3 px-4 rounded-tr-lg font-semibold">Süre</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leaderboardData.map((row, index) => (
-                    <tr key={index} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                      <td className="py-3 px-4 font-medium text-slate-500">{index + 1}</td>
-                      <td className="py-3 px-4 font-bold text-slate-800">{row.nickname}</td>
-                      <td className="py-3 px-4 font-bold text-indigo-600">{row.score}</td>
-                      <td className="py-3 px-4 text-slate-600">{formatTime(row.time_left)}</td>
+        <div className="w-full flex-1 flex flex-col justify-center items-center p-4">
+          <div className="w-full max-w-3xl bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 text-center">
+            <h2 className="text-2xl sm:text-3xl font-black text-violet-500 mb-6 border-b border-slate-100 pb-4">
+              Bugünün Liderlik Tablosu
+            </h2>
+            {leaderboardData.length === 0 ? (
+              <p className="text-slate-500 py-8">Henüz bir skor kaydedilmemiş.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-violet-50 text-violet-800">
+                      <th className="py-3 px-4 rounded-tl-lg font-semibold">#</th>
+                      <th className="py-3 px-4 font-semibold">Oyuncu</th>
+                      <th className="py-3 px-4 font-semibold">Puan</th>
+                      <th className="py-3 px-4 rounded-tr-lg font-semibold text-right">Süre</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  </thead>
+                  <tbody>
+                    {leaderboardData.map((item, idx) => (
+                      <tr key={idx} className="border-b border-slate-50 last:border-none hover:bg-slate-50 transition-colors">
+                        <td className="py-3 px-4 text-slate-500 font-medium">{idx + 1}</td>
+                        <td className="py-3 px-4 font-bold text-slate-700">{item.nickname}</td>
+                        <td className="py-3 px-4 font-black text-violet-600">{item.score}</td>
+                        <td className="py-3 px-4 font-mono text-slate-500 text-right">{item.time_left} sn</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
             <button 
               onClick={handleShareResult}
-              className="px-8 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition-colors shadow-lg hover:shadow-xl active:scale-95 flex items-center gap-2"
+              className="mt-8 px-8 py-3 bg-slate-800 text-white font-bold rounded-xl shadow-md hover:bg-slate-700 transition-all font-sans"
             >
-              <span>🔗 Sonucu Paylaş</span>
+              Sonucumu Paylaş
             </button>
-            <p className="text-sm font-medium text-slate-400 mt-2 sm:mt-0 text-center">Yarın yeni kelimelerle görüşmek üzere!</p>
           </div>
         </div>
       ) : (
-        <div className="w-full max-w-3xl bg-white rounded-2xl shadow-xl p-6 sm:p-10 relative overflow-hidden">
-          
-          {/* Oyun Sonu Modalı */}
+        <>
+          {/* Oyun Bitti Modalı */}
           {showGameOverModal && (
-            <div className="absolute inset-0 bg-white/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-6 text-center">
-              <h2 className="text-4xl font-black text-indigo-700 mb-2 mt-4">Oyun Bitti!</h2>
-              <p className="text-lg text-slate-600 mb-8 font-medium">Soruları tamamladınız veya süreniz doldu.</p>
-              
-              <div className="flex gap-4 mb-8">
-                <div className="bg-indigo-50 px-6 py-4 rounded-2xl border border-indigo-100 shadow-sm min-w-[120px]">
-                  <div className="text-sm text-indigo-500 font-bold tracking-wider uppercase mb-1">Skorunuz</div>
-                  <div className="text-4xl font-black text-indigo-700">{score}</div>
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+              <div className="bg-white rounded-2xl p-6 sm:p-10 w-full max-w-md shadow-xl border border-slate-100 relative max-h-[90vh] overflow-y-auto">
+                
+                <h3 className="text-3xl font-black text-center text-slate-800 mb-2">Oyun Bitti!</h3>
+                <p className="text-center text-slate-500 mb-8">İşte bugünkü harika sonucun:</p>
+                
+                <div className="flex justify-center gap-6 mb-8">
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">Toplam Puan</p>
+                    <p className="text-4xl font-black text-violet-500">{score}</p>
+                  </div>
+                  <div className="w-px bg-slate-200"></div>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">Kalan Süre</p>
+                    <p className="text-4xl font-mono text-slate-700">{formatTime(timeLeft)}</p>
+                  </div>
                 </div>
-                <div className="bg-amber-50 px-6 py-4 rounded-2xl border border-amber-100 shadow-sm min-w-[120px]">
-                  <div className="text-sm text-amber-600 font-bold tracking-wider uppercase mb-1">Kalan Süre</div>
-                  <div className="text-4xl font-black text-amber-700">{formatTime(timeLeft)}</div>
-                </div>
-              </div>
 
-              <form onSubmit={handleSaveScore} className="w-full max-w-sm flex flex-col gap-4">
-                <input 
-                  type="text" 
-                  required
-                  maxLength={20}
-                  value={nickname} 
-                  onChange={(e) => setNickname(e.target.value)} 
-                  placeholder="Takma Adınızı Girin" 
-                  className="w-full p-4 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 text-xl font-bold text-center text-slate-800 placeholder-slate-400 transition-all"
-                />
-                <button 
-                  type="submit" 
-                  disabled={isSavingScore || !nickname.trim()}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform active:scale-95 text-lg"
-                >
-                  {isSavingScore ? "Kaydediliyor..." : "Skoru Kaydet"}
-                </button>
-              </form>
+                <form onSubmit={handleSaveScore} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-600 mb-2 border-none">
+                      Skor Tablosu İçin Adın:
+                    </label>
+                    <input 
+                      type="text" 
+                      value={nickname}
+                      onChange={(e) => setNickname(e.target.value)}
+                      placeholder="Ad veya Rumuz"
+                      maxLength={15}
+                      className="w-full px-5 py-4 text-center text-lg font-bold border-2 border-slate-200 rounded-xl focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 transition-all"
+                      required
+                    />
+                  </div>
+                  <button 
+                    type="submit" 
+                    disabled={isSavingScore || !nickname.trim()}
+                    className="w-full bg-violet-500 hover:bg-violet-600 active:scale-95 disabled:opacity-50 text-white font-bold py-4 rounded-xl shadow-md transition-all text-lg flex items-center justify-center gap-2"
+                  >
+                    {isSavingScore ? "Kaydediliyor..." : "Skoru Kaydet"}
+                  </button>
+                </form>
+
+              </div>
             </div>
           )}
 
-          {/* Üst Kısım: Süre, Puan ve Anlık Değer */}
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-8 border-b pb-4 gap-4">
-            <div className="text-lg sm:text-2xl font-bold text-slate-700 flex items-center gap-2">
-              <span>Süre:</span>
-              <span className={`font-mono ${timeLeft < 60 ? "text-red-500" : "text-slate-900"} ${isAnswering ? "animate-pulse text-amber-500" : ""}`}>
-                {formatTime(timeLeft)}
-              </span>
-            </div>
-
-            <div className="text-sm font-semibold text-indigo-600 bg-indigo-50 px-4 py-2 rounded-lg">
-              Bu Sorunun Değeri: {currentPotentialScore} Puan
-            </div>
-
-            <div className="text-lg sm:text-2xl font-bold text-slate-700 flex items-center gap-2">
-              <span>Toplam Puan:</span>
-              <span className="text-green-600 font-mono">{score}</span>
-            </div>
-          </div>
-
-          {/* Orta Kısım: Soru İpucu */}
-          <div className="mb-12 text-center">
-            <div className="inline-block bg-indigo-100 text-indigo-800 font-semibold px-4 py-1 rounded-full text-sm mb-4">
-              Soru {currentQuestionIndex + 1} / {questions.length}
-            </div>
-            <h2 className="text-xl sm:text-3xl font-medium text-slate-800 leading-relaxed">
-              {currentQuestion.clue}
-            </h2>
-          </div>
-
-          {/* Soru Kutucukları (Harfler) */}
-          <div className="flex justify-center gap-2 sm:gap-4 mb-12 flex-wrap">
-            {currentQuestion.word.split("").map((letter: string, index: number) => {
-              const isRevealed = revealedLetters.includes(index);
-              return (
-                <div
-                  key={index}
-                  className={`w-12 h-16 sm:w-16 sm:h-20 border-2 rounded-xl flex items-center justify-center text-2xl sm:text-4xl font-bold uppercase transition-all duration-300
-                    ${isRevealed 
-                      ? "bg-slate-800 text-white border-slate-800" 
-                      : "bg-slate-100 text-transparent border-slate-300 shadow-inner"
-                    }`}
-                >
-                  {isRevealed ? letter : ""}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Alt Kısım: Butonlar veya Cevaplama Formu */}
-          {!isAnswering ? (
-            <div className="flex justify-center gap-4 sm:gap-6 border-t pt-8">
-              <button 
-                onClick={handleGetLetter}
-                disabled={!isGameActive || revealedLetters.length === currentQuestion.word.length}
-                className="flex-1 max-w-[200px] px-6 py-4 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-lg font-bold rounded-xl transition-colors shadow-md hover:shadow-lg active:scale-95"
-              >
-                Harf Al
-              </button>
-              <button 
-                onClick={handleAnswerClick}
-                disabled={!isGameActive || revealedLetters.length === currentQuestion.word.length}
-                className="flex-1 max-w-[200px] px-6 py-4 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-lg font-bold rounded-xl transition-colors shadow-md hover:shadow-lg active:scale-95"
-              >
-                Cevapla
-              </button>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center border-t pt-8 relative">
-              <div className="absolute -top-12 bg-red-100 text-red-600 px-4 py-2 font-bold rounded-xl border border-red-200">
-                Kalan Cevap Süresi: {answerTimeLeft} saniye
+          {/* OYUN ANA EKRANI (Ana Tasarım) */}
+          <header className={`w-full max-w-4xl mx-auto px-4 py-8 relative flex items-center justify-between ${showGameOverModal ? 'blur-sm' : ''}`}>
+            {/* Sol: Logo */}
+            <div className="flex-1 flex justify-start">
+              <div className="text-4xl sm:text-5xl font-black text-violet-500 tracking-tight">
+                ZIPIR
               </div>
-              
-              <form onSubmit={handleSubmitAnswer} className="w-full flex flex-col sm:flex-row justify-center gap-4">
-                <input
-                  type="text"
-                  autoFocus
-                  value={userAnswer}
-                  onChange={(e) => setUserAnswer(e.target.value)}
-                  placeholder="Cevabınızı girin..."
-                  className="flex-1 p-4 border-2 border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-500 text-lg uppercase font-medium"
-                />
-                <button 
-                  type="submit"
-                  className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-bold rounded-xl transition-colors shadow-md hover:shadow-lg active:scale-95"
-                >
-                  Gönder
-                </button>
-              </form>
             </div>
-          )}
 
-        </div>
+            {/* Orta: Soru Sayacı */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 hidden sm:flex items-center justify-center font-medium text-slate-500 bg-slate-200/50 px-5 py-2 rounded-full text-base">
+              Soru: <span className="text-slate-700 font-bold ml-1.5">{currentQuestionIndex + 1} / {questions.length}</span>
+            </div>
+
+            {/* Sağ: Puan ve Süre */}
+            <div className="flex-1 flex justify-end">
+              <div className="flex flex-col items-end sm:flex-row sm:items-center py-2 px-4 bg-white shadow-sm rounded-xl border border-slate-100 gap-2 sm:gap-5">
+                <div className="text-base font-semibold text-slate-600">
+                  Puan: <span className="text-violet-600 font-bold text-lg sm:text-xl">{score}</span>
+                </div>
+                <div className="hidden sm:block w-px h-6 bg-slate-200"></div>
+                <div className="text-base font-semibold text-slate-600 flex items-center gap-2">
+                  <span className="text-xl">⏱️</span>
+                  <span className={`font-bold text-lg sm:text-xl w-14 text-right font-mono ${timeLeft < 60 ? "text-red-500 animate-pulse" : "text-slate-700"}`}>
+                    {formatTime(timeLeft)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Mobil Soru Sayacı */}
+          <div className="sm:hidden flex justify-center mb-6 mt-2">
+            <div className="font-medium text-slate-500 bg-slate-200/50 px-5 py-2 rounded-full text-base">
+              Soru: <span className="text-slate-700 font-bold ml-1.5">{currentQuestionIndex + 1} / {questions.length}</span>
+            </div>
+          </div>
+
+          <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pb-20 ${showGameOverModal ? 'blur-sm' : ''}`}>
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 flex flex-col items-center relative">
+              
+              {/* Soru Değeri Etiketi */}
+              <div className="absolute -top-4 bg-gradient-to-r from-violet-500 to-violet-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm uppercase tracking-wide">
+                Bu sorunun değeri: {currentPotentialScore} Puan
+              </div>
+
+              {/* Soru / İpucu Metni */}
+              <div className="mt-8 mb-10 w-full text-center">
+                <h2 className="text-2xl sm:text-3xl font-serif italic text-slate-700 leading-snug">
+                  "{currentQuestion.clue}"
+                </h2>
+              </div>
+
+              {/* Harf Kutuları */}
+              <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10">
+                {currentQuestion.word.split("").map((letter: string, index: number) => {
+                  const isRevealed = revealedLetters.includes(index);
+                  return (
+                    <div
+                      key={index}
+                      className={`w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl border-2 text-2xl sm:text-3xl font-bold uppercase transition-all duration-300
+                        ${isRevealed 
+                          ? "bg-violet-50 border-violet-200 text-violet-700 shadow-sm"
+                          : "bg-slate-50 border-slate-200 text-transparent"
+                        }`}
+                    >
+                      {isRevealed ? letter : ""}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Alt Kısım: Kontroller veya Cevap Formu */}
+              {!isAnswering ? (
+                <div className="flex flex-col sm:flex-row items-center justify-center w-full gap-4 sm:gap-6 mt-4">
+                  <button 
+                    onClick={handleGetLetter}
+                    disabled={!isGameActive || revealedLetters.length === currentQuestion.word.length}
+                    className="w-full sm:w-auto flex flex-col items-center justify-center group px-8 py-3.5 rounded-xl border-2 border-violet-200 bg-violet-50 text-violet-600 hover:bg-violet-100 hover:border-violet-300 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="font-bold text-lg">Harf Al</span>
+                    <span className="text-xs font-semibold opacity-70 mt-0.5 group-hover:opacity-100 flex items-center gap-1">
+                      -100 Puan
+                    </span>
+                  </button>
+                  <button 
+                    onClick={handleAnswerClick}
+                    disabled={!isGameActive || revealedLetters.length === currentQuestion.word.length}
+                    className="w-full sm:w-auto flex flex-col items-center justify-center px-10 py-3.5 rounded-xl bg-violet-500 text-white shadow-md shadow-violet-200 hover:bg-violet-600 hover:shadow-lg hover:shadow-violet-300 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="font-bold text-lg">Cevapla</span>
+                    <span className="text-xs font-medium text-violet-100 mt-0.5">
+                      Tahmini Gir
+                    </span>
+                  </button>
+                </div>
+              ) : (
+                <div className="w-full flex flex-col items-center mt-4 relative">
+                  <div className="absolute -top-12 bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-full font-bold text-sm flex items-center gap-1.5 shadow-sm animate-pulse">
+                    <span>⏱️</span> Kalan Cevap Süresi: {answerTimeLeft} sn
+                  </div>
+                  
+                  <form onSubmit={handleSubmitAnswer} className="w-full flex flex-col sm:flex-row justify-center gap-3">
+                    <input
+                      type="text"
+                      autoFocus
+                      value={userAnswer}
+                      onChange={(e) => setUserAnswer(e.target.value)}
+                      placeholder="Cevabınızı girin..."
+                      className="flex-1 px-5 py-4 border-2 border-violet-200 bg-violet-50/50 rounded-xl focus:outline-none focus:border-violet-500 focus:bg-white text-lg lg:text-xl uppercase font-bold text-center sm:text-left transition-colors"
+                    />
+                    <button 
+                      type="submit"
+                      className="px-8 py-4 bg-slate-800 text-white font-bold rounded-xl shadow-md hover:bg-slate-700 transition-all active:scale-95 text-lg"
+                    >
+                      Gönder
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
+          </main>
+        </>
       )}
     </div>
   );
