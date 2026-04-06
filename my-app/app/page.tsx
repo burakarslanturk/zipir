@@ -425,9 +425,23 @@ export default function GamePage() {
   // Cevabı Gönderme
   const handleSubmitAnswer = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userAnswer.trim()) return;
+    
+    // Kullanıcının girdiği eksik harfleri asıl kelimedeki boşluklara yerleştirip tam kelimeyi oluştur
+    let fullWord = "";
+    let typedIndex = 0;
+    for (let i = 0; i < currentQuestion.word.length; i++) {
+      if (revealedLetters.includes(i)) {
+        fullWord += currentQuestion.word[i];
+      } else {
+        fullWord += userAnswer[typedIndex] || "";
+        typedIndex++;
+      }
+    }
 
-    const isCorrect = userAnswer.toLocaleLowerCase("tr-TR") === currentQuestion.word.toLocaleLowerCase("tr-TR");
+    // Eğer geçerli bir harf girilmediyse gönderme
+    if (!userAnswer.trim() && typedIndex > 0) return;
+
+    const isCorrect = fullWord.toLocaleLowerCase("tr-TR") === currentQuestion.word.toLocaleLowerCase("tr-TR");
     
     if (isCorrect) {
       setScore((prev) => prev + currentPotentialScore);
@@ -647,22 +661,58 @@ export default function GamePage() {
               </div>
 
               {/* Harf Kutuları */}
-              <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10">
-                {currentQuestion.word.split("").map((letter: string, index: number) => {
-                  const isRevealed = revealedLetters.includes(index);
-                  return (
-                    <div
-                      key={index}
-                      className={`w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl border-2 text-2xl sm:text-3xl font-bold uppercase transition-all duration-300
-                        ${isRevealed 
-                          ? "bg-violet-50 border-violet-200 text-violet-700 shadow-sm"
-                          : "bg-slate-50 border-slate-200 text-transparent"
-                        }`}
-                    >
-                      {isRevealed ? letter : ""}
-                    </div>
-                  );
-                })}
+              <div 
+                className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10 cursor-text"
+                onClick={() => {
+                  if (isAnswering) document.getElementById('hidden-answer-input')?.focus();
+                }}
+              >
+                {(() => {
+                  let typedIndexCounter = 0;
+                  return currentQuestion.word.split("").map((letter: string, index: number) => {
+                    const isRevealed = revealedLetters.includes(index);
+                    let displayChar = "";
+                    let isUserTyped = false;
+                    let isActiveBox = false;
+
+                    if (isRevealed) {
+                      displayChar = letter; // Sistem açtığı harfler
+                    } else {
+                      if (isAnswering) {
+                        // Kullanıcının girdiği harfleri sırasıyla boş kutulara yerleştiriyoruz
+                        if (typedIndexCounter < userAnswer.length) {
+                          displayChar = userAnswer[typedIndexCounter];
+                          isUserTyped = true;
+                        } else if (typedIndexCounter === userAnswer.length) {
+                          // Bu kutu bir sonraki yazılacak kutu
+                          isActiveBox = true;
+                        }
+                      }
+                      typedIndexCounter++;
+                    }
+
+                    return (
+                      <div
+                        key={index}
+                        className={`relative w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl border-2 text-2xl sm:text-3xl font-bold uppercase transition-all duration-300
+                          ${isRevealed 
+                            ? "bg-violet-50 border-violet-200 text-violet-700 shadow-sm" // Sistem İpucu Harfi
+                            : isUserTyped
+                              ? "bg-white border-violet-500 text-violet-700 shadow-md transform -translate-y-1" // Kullanıcı Girdisi Harf
+                              : (isAnswering && isActiveBox)
+                                ? "bg-violet-50/50 border-violet-400 shadow-inner ring-4 ring-violet-200/50" // Odaklanılan (Sıradaki) Kutu
+                                : "bg-slate-50 border-slate-200 text-transparent" // Boş normal kutu
+                          }`}
+                      >
+                        {displayChar}
+                        {/* Aktif kutudayken küçük bir imleç işareti göster */}
+                        {isAnswering && isActiveBox && (
+                          <div className="absolute w-5 h-1 bg-violet-400 bottom-2 rounded-full animate-pulse"></div>
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
               </div>
 
               {/* Alt Kısım: Kontroller veya Cevap Formu */}
@@ -695,18 +745,32 @@ export default function GamePage() {
                     <span>⏱️</span> Kalan Cevap Süresi: {answerTimeLeft} sn
                   </div>
                   
-                  <form onSubmit={handleSubmitAnswer} className="w-full flex flex-col sm:flex-row justify-center gap-3">
+                  <form onSubmit={handleSubmitAnswer} className="w-full flex flex-col items-center gap-3 relative">
+                    {/* Gizli input. Klavyeyi tetikler ve metni güvenilir şekilde yakalar. (Backspace dahil her şeyi çözer) */}
                     <input
+                      id="hidden-answer-input"
                       type="text"
                       autoFocus
+                      autoComplete="off"
+                      autoCorrect="off"
+                      spellCheck="false"
                       value={userAnswer}
-                      onChange={(e) => setUserAnswer(e.target.value.toLocaleUpperCase('tr-TR'))}
-                      placeholder="Cevabınızı girin..."
-                      className="flex-1 px-5 py-4 border-2 border-violet-200 bg-violet-50/50 rounded-xl focus:outline-none focus:border-violet-500 focus:bg-white text-lg lg:text-xl font-bold text-center sm:text-left transition-colors"
+                      maxLength={currentQuestion.word.length - revealedLetters.length} // Yalnızca boş kutu kadar karakter alır
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        // Yalnızca A-Z ve Türkçe harfleri kabul et
+                        const filtered = val.replace(/[^a-zA-ZçğıöşüÇĞİÖŞÜ]/g, '');
+                        setUserAnswer(filtered.toLocaleUpperCase('tr-TR'));
+                      }}
+                      className="absolute opacity-0 w-0 h-0 -z-10 focus:outline-none cursor-default"
                     />
+                    
+                    <div className="text-center text-slate-500 text-sm mb-4">
+                      Klavyeden harfleri tuşlayın. Göndermek için <strong className="text-slate-700">Enter</strong>'a basın.
+                    </div>
                     <button 
                       type="submit"
-                      className="px-8 py-4 bg-slate-800 text-white font-bold rounded-xl shadow-md hover:bg-slate-700 transition-all active:scale-95 text-lg"
+                      className="px-10 py-3 bg-violet-600/90 text-white font-bold rounded-xl shadow-md hover:bg-violet-700 transition-all active:scale-95 text-lg"
                     >
                       Gönder
                     </button>
