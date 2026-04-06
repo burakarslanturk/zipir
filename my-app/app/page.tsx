@@ -456,7 +456,7 @@ export default function GamePage() {
               </div>
               <div className="pt-0.5">
                 <p className="text-slate-600 font-medium text-sm sm:text-base leading-tight">
-                  <strong className="text-slate-800">"Cevapla"</strong> dedikten sonra ana süre durur, <strong className="text-emerald-600">20 saniyelik cevaplama süreniz</strong> başlar ve tüm boş harfleri doldurmanız zorunludur.
+                  <strong className="text-slate-800">"Cevapla"</strong> dedikten sonra ana süre durur, <strong className="text-emerald-600">20 saniyelik cevaplama süreniz</strong> başlar ve süre bitene kadar cevap deneyebilirsiniz.
                 </p>
               </div>
             </li>
@@ -469,7 +469,7 @@ export default function GamePage() {
               </div>
               <div className="pt-0.5">
                 <p className="text-slate-600 font-medium text-sm sm:text-base leading-tight">
-                  <strong className="text-slate-800">Dikkat:</strong> Yanlış tahmin yaparsanız veya süreniz biterse o an alınabilecek puan <strong className="text-red-600">eksi puan (-)</strong> olarak hanenize yansır.
+                  <strong className="text-slate-800">Dikkat:</strong> Cevaplama süreniz biterse, o an alınabilecek puan <strong className="text-red-600">eksi puan (-)</strong> olarak hanenize yansır.
                 </p>
               </div>
             </li>
