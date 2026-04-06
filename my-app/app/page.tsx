@@ -69,6 +69,16 @@ export default function GamePage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const [answerStatus, setAnswerStatus] = useState<"idle" | "correct" | "wrong">("idle");
+  const [isScoreAnimating, setIsScoreAnimating] = useState(false);
+
+  // Puan değiştiğinde animasyon tetiklemek için etki
+  useEffect(() => {
+    if (score > 0 || (score === 0 && questions.length > 0)) {
+      setIsScoreAnimating(true);
+      const timer = setTimeout(() => setIsScoreAnimating(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [score, questions.length]);
 
   // Oyun Sonu & Leaderboard State'leri
   const [showGameOverModal, setShowGameOverModal] = useState(false);
@@ -729,8 +739,8 @@ export default function GamePage() {
             {/* Sağ: Puan */}
             <div className="flex-1 flex justify-end">
               <div className="flex items-center py-2 px-5 bg-white shadow-sm rounded-xl border border-slate-100">
-                <div className="text-base font-semibold text-slate-600">
-                  Puan: <span className="text-violet-600 font-bold text-lg sm:text-xl ml-1.5">{score}</span>
+                <div className="text-base font-semibold text-slate-600 flex items-center">
+                  Puan: <span className={`text-violet-600 font-bold text-lg sm:text-xl ml-1.5 transition-transform duration-300 ${isScoreAnimating ? 'scale-[1.3]' : 'scale-100'}`}>{score}</span>
                 </div>
               </div>
             </div>
