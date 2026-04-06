@@ -738,13 +738,21 @@ export default function GamePage() {
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 flex flex-col items-center relative">
               
               {/* Kart İçi Üst Bilgi Satırı: Soru Sayısı ve Süre */}
-              <div className="w-full flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
+              <div className="w-full flex justify-between items-center mb-8 border-b border-slate-100 pb-4 relative">
                 <div className="flex items-center gap-2 text-slate-500 font-medium">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
                     <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                   </svg>
                   <span>Soru: <strong className="text-slate-700 ml-1">{currentQuestionIndex + 1} / {questions.length}</strong></span>
                 </div>
+                
+                {/* 20 Saniyelik Cevaplama Süresi - Soru ve Ana Süre Arasında */}
+                {isAnswering && (
+                  <div className="absolute left-1/2 transform -translate-x-1/2 bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-full font-bold text-sm flex items-center gap-1.5 shadow-sm animate-pulse whitespace-nowrap">
+                    <span>⏱️</span> Kalan Cevap Süresi: {answerTimeLeft} sn
+                  </div>
+                )}
+                
                 <div className={`flex items-center gap-2 font-mono text-lg sm:text-xl ${timeLeft <= 30 ? "text-red-500 font-bold animate-pulse scale-105 transition-transform" : "text-slate-700 font-bold"}`}>
                   <span className="text-xl sm:text-2xl">⏱️</span>
                   <span className="w-14 text-right">{formatTime(timeLeft)}</span>
@@ -848,10 +856,6 @@ export default function GamePage() {
                 </div>
               ) : (
                 <div className="w-full flex flex-col items-center mt-4 relative">
-                  <div className="absolute -top-12 bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-full font-bold text-sm flex items-center gap-1.5 shadow-sm animate-pulse">
-                    <span>⏱️</span> Kalan Cevap Süresi: {answerTimeLeft} sn
-                  </div>
-                  
                   <form onSubmit={handleSubmitAnswer} className="w-full flex flex-col items-center gap-3 relative">
                     {/* Gizli input. Klavyeyi tetikler ve metni güvenilir şekilde yakalar. (Backspace dahil her şeyi çözer) */}
                     <input
@@ -872,12 +876,9 @@ export default function GamePage() {
                       className="absolute opacity-0 w-0 h-0 -z-10 focus:outline-none cursor-default"
                     />
                     
-                    <div className="text-center text-slate-500 text-sm mb-4">
-                      Klavyeden harfleri tuşlayın. Göndermek için <strong className="text-slate-700">Enter</strong>'a basın.
-                    </div>
                     <button 
                       type="submit"
-                      className="px-10 py-3 bg-violet-600/90 text-white font-bold rounded-xl shadow-md hover:bg-violet-700 transition-all active:scale-95 text-lg"
+                      className="px-12 py-3.5 bg-violet-600 text-white font-bold rounded-xl shadow-md hover:bg-violet-700 transition-all active:scale-95 text-lg"
                     >
                       Gönder
                     </button>
