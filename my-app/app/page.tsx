@@ -724,37 +724,32 @@ export default function GamePage() {
               </div>
             </div>
 
-            {/* Orta: Soru Sayacı */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 hidden sm:flex items-center justify-center font-medium text-slate-500 bg-slate-200/50 px-5 py-2 rounded-full text-base">
-              Soru: <span className="text-slate-700 font-bold ml-1.5">{currentQuestionIndex + 1} / {questions.length}</span>
-            </div>
-
-            {/* Sağ: Puan ve Süre */}
+            {/* Sağ: Puan */}
             <div className="flex-1 flex justify-end">
-              <div className="flex flex-col items-end sm:flex-row sm:items-center py-2 px-4 bg-white shadow-sm rounded-xl border border-slate-100 gap-2 sm:gap-5">
+              <div className="flex items-center py-2 px-5 bg-white shadow-sm rounded-xl border border-slate-100">
                 <div className="text-base font-semibold text-slate-600">
-                  Puan: <span className="text-violet-600 font-bold text-lg sm:text-xl">{score}</span>
-                </div>
-                <div className="hidden sm:block w-px h-6 bg-slate-200"></div>
-                <div className="text-base font-semibold text-slate-600 flex items-center gap-2">
-                  <span className="text-xl">⏱️</span>
-                  <span className={`font-bold text-lg sm:text-xl w-14 text-right font-mono ${timeLeft < 60 ? "text-red-500 animate-pulse" : "text-slate-700"}`}>
-                    {formatTime(timeLeft)}
-                  </span>
+                  Puan: <span className="text-violet-600 font-bold text-lg sm:text-xl ml-1.5">{score}</span>
                 </div>
               </div>
             </div>
           </header>
 
-          {/* Mobil Soru Sayacı */}
-          <div className="sm:hidden flex justify-center mb-6 mt-2">
-            <div className="font-medium text-slate-500 bg-slate-200/50 px-5 py-2 rounded-full text-base">
-              Soru: <span className="text-slate-700 font-bold ml-1.5">{currentQuestionIndex + 1} / {questions.length}</span>
-            </div>
-          </div>
-
           <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pb-20 ${showGameOverModal ? 'blur-sm' : ''}`}>
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 flex flex-col items-center relative">
+              
+              {/* Kart İçi Üst Bilgi Satırı: Soru Sayısı ve Süre */}
+              <div className="w-full flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-2 text-slate-500 font-medium">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+                    <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                  <span>Soru: <strong className="text-slate-700 ml-1">{currentQuestionIndex + 1} / {questions.length}</strong></span>
+                </div>
+                <div className={`flex items-center gap-2 font-mono text-lg sm:text-xl ${timeLeft <= 30 ? "text-red-500 font-bold animate-pulse scale-105 transition-transform" : "text-slate-700 font-bold"}`}>
+                  <span className="text-xl sm:text-2xl">⏱️</span>
+                  <span className="w-14 text-right">{formatTime(timeLeft)}</span>
+                </div>
+              </div>
               
               {/* Soru Değeri Etiketi */}
               <div className="absolute -top-4 bg-gradient-to-r from-violet-500 to-violet-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm uppercase tracking-wide">
