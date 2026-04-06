@@ -68,7 +68,6 @@ export default function GamePage() {
   const [answerTimeLeft, setAnswerTimeLeft] = useState(20);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
-  const [showWarningToast, setShowWarningToast] = useState(false);
   const [answerStatus, setAnswerStatus] = useState<"idle" | "correct" | "wrong">("idle");
 
   // Oyun Sonu & Leaderboard State'leri
@@ -517,10 +516,8 @@ export default function GamePage() {
     const emptyBoxesCount = currentQuestion.word.length - revealedLetters.length;
     if (userAnswer.length !== emptyBoxesCount) {
       setIsShaking(true);
-      setShowWarningToast(true);
       
       setTimeout(() => setIsShaking(false), 500);
-      setTimeout(() => setShowWarningToast(false), 2000);
       return;
     }
 
@@ -544,7 +541,17 @@ export default function GamePage() {
     if (isCorrect) {
       handleCorrectAnswer(currentPotentialScore);
     } else {
-      handleWrongAnswer(currentPotentialScore, false);
+      // Yanlış tahminde eksi puan yok, yeni soruya geçme
+      // Sadece kutuları kırmızı yap, titret ve kullanıcı girdisini sil
+      setAnswerStatus("wrong");
+      setIsShaking(true);
+      
+      setTimeout(() => {
+        setIsShaking(false);
+        setAnswerStatus("idle");
+        setUserAnswer("");
+        document.getElementById('hidden-answer-input')?.focus();
+      }, 500);
     }
   };
 
@@ -747,12 +754,6 @@ export default function GamePage() {
           </div>
 
           <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pb-20 ${showGameOverModal ? 'blur-sm' : ''}`}>
-            {showWarningToast && (
-              <div className="fixed top-6 sm:top-10 left-1/2 transform -translate-x-1/2 bg-amber-50 text-amber-700 border-2 border-amber-200 px-5 sm:px-6 py-3 rounded-2xl shadow-xl font-bold flex items-center gap-3 z-50 animate-bounce text-sm sm:text-base whitespace-nowrap">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <span>Lütfen kelimeyi tamamlayın</span>
-              </div>
-            )}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 flex flex-col items-center relative">
               
               {/* Soru Değeri Etiketi */}
