@@ -1,110 +1,92 @@
 import React from 'react';
 
-export default function GameUIDemo() {
+export default function SplashDemo() {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
-      {/* 1. Üst Bar (Header) */}
-      <header className="w-full max-w-4xl mx-auto px-4 py-8 relative flex items-center justify-between">
-        {/* Sol: Logo */}
-        <div className="flex-1 flex justify-start">
-          <div className="text-4xl sm:text-5xl font-black text-violet-500 tracking-tight">
-            ZIPIR
-          </div>
-        </div>
-
-        {/* Orta: Soru Sayacı */}
-        <div className="absolute left-1/2 transform -translate-x-1/2 hidden sm:flex items-center justify-center font-medium text-slate-500 bg-slate-200/50 px-5 py-2 rounded-full text-base">
-          Soru: <span className="text-slate-700 font-bold ml-1.5">4 / 14</span>
-        </div>
-
-        {/* Sağ: Puan ve Süre */}
-        <div className="flex-1 flex justify-end">
-          <div className="flex flex-col items-end sm:flex-row sm:items-center py-2 px-4 bg-white shadow-sm rounded-xl border border-slate-100 gap-2 sm:gap-5">
-            <div className="text-base font-semibold text-slate-600">
-              Puan: <span className="text-violet-600 font-bold text-lg sm:text-xl">2400</span>
-            </div>
-            <div className="hidden sm:block w-px h-6 bg-slate-200"></div>
-            <div className="text-base font-semibold text-slate-600 flex items-center gap-2">
-              <span className="text-xl">⏱️</span>
-              <span className="font-bold text-lg sm:text-xl w-14 text-right font-mono">02:45</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobil Soru Sayacı (Küçük ekranlar için başlığın altına alıyoruz) */}
-      <div className="sm:hidden flex justify-center mb-6 mt-2">
-        <div className="font-medium text-slate-500 bg-slate-200/50 px-5 py-2 rounded-full text-base">
-          Soru: <span className="text-slate-700 font-bold ml-1.5">4 / 14</span>
-        </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 font-sans text-slate-800">
+      
+      {/* 1. Marka Alanı */}
+      <div className="flex flex-col items-center text-center">
+        <h1 className="text-6xl sm:text-7xl font-black text-violet-600 tracking-tight drop-shadow-sm">
+          ZIPIR
+        </h1>
+        <p className="mt-3 text-lg sm:text-xl text-slate-500 font-light tracking-wide">
+          Günlük Kelime Bulmaca Oyunu
+        </p>
       </div>
 
-      {/* 2. Ana Oyun Alanı (Merkez) */}
-      <main className="flex-1 w-full max-w-2xl mx-auto px-4 flex flex-col justify-center pb-20">
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 flex flex-col items-center relative">
-          
-          {/* Soru Değeri Etiketi */}
-          <div className="absolute -top-4 bg-gradient-to-r from-violet-500 to-violet-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm uppercase tracking-wide">
-            Bu sorunun değeri: 600 Puan
-          </div>
+      {/* 2. Kurallar Kartı */}
+      <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 sm:p-10 w-full max-w-lg mt-10 mb-10 transform transition-all hover:shadow-2xl">
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-8 text-center pb-4 border-b border-slate-100">
+          Nasıl Oynanır?
+        </h2>
+        
+        <ul className="space-y-6">
+          {/* Kural 1: Hedef */}
+          <li className="flex items-start gap-4">
+            <div className="flex-shrink-0 bg-violet-100 text-violet-600 p-3 rounded-2xl">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+              </svg>
+            </div>
+            <div className="pt-1">
+              <p className="text-slate-600 font-medium text-lg leading-snug">
+                Toplam <strong className="text-violet-600">14 kelime</strong> sorulur.
+              </p>
+            </div>
+          </li>
 
-          {/* Soru / İpucu Metni */}
-          <div className="mt-8 mb-10 w-full text-center">
-            <h2 className="text-2xl sm:text-3xl font-serif italic text-slate-700 leading-snug">
-              "Zamanla yıpranarak eskimiş, değerini yitirmiş olan şey."
-            </h2>
-          </div>
+          {/* Kural 2: Zaman */}
+          <li className="flex items-start gap-4">
+            <div className="flex-shrink-0 bg-amber-100 text-amber-600 p-3 rounded-2xl">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <div className="pt-1">
+              <p className="text-slate-600 font-medium text-lg leading-snug">
+                Tüm kelimeler için toplam <strong className="text-amber-600">4 dakika</strong> süreniz vardır.
+              </p>
+            </div>
+          </li>
 
-          {/* Harf Kutuları (Word Boxes) */}
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10">
-            {/* 7 harfli kelime örneği: Y _ P _ A _ N */}
-            <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl bg-violet-50 border-2 border-violet-200 text-2xl sm:text-3xl font-bold text-violet-700 shadow-sm">
-              Y
+          {/* Kural 3: Harf Alma */}
+          <li className="flex items-start gap-4">
+            <div className="flex-shrink-0 bg-blue-100 text-blue-600 p-3 rounded-2xl">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>
+              </svg>
             </div>
-            <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl bg-slate-50 border-2 border-slate-200 text-2xl sm:text-3xl font-bold text-slate-400">
-              {/* Boş */}
+            <div className="pt-1">
+              <p className="text-slate-600 font-medium text-lg leading-snug">
+                <strong className="text-slate-800">"Harf Al"</strong> butonu rastgele bir harf açar ama <strong className="text-red-500">-100 puan</strong> düşer.
+              </p>
             </div>
-            <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl bg-violet-50 border-2 border-violet-200 text-2xl sm:text-3xl font-bold text-violet-700 shadow-sm">
-              P
-            </div>
-            <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl bg-slate-50 border-2 border-slate-200 text-2xl sm:text-3xl font-bold text-slate-400">
-              {/* Boş */}
-            </div>
-            <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl bg-violet-50 border-2 border-violet-200 text-2xl sm:text-3xl font-bold text-violet-700 shadow-sm">
-              A
-            </div>
-            <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl bg-slate-50 border-2 border-slate-200 text-2xl sm:text-3xl font-bold text-slate-400">
-              {/* Boş */}
-            </div>
-            <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl bg-violet-50 border-2 border-violet-200 text-2xl sm:text-3xl font-bold text-violet-700 shadow-sm">
-              N
-            </div>
-          </div>
+          </li>
 
-          {/* 3. Kontroller (Butonlar) */}
-          <div className="flex flex-col sm:flex-row items-center justify-center w-full gap-4 sm:gap-6 mt-4">
-            {/* Harf Al Butonu */}
-            <button className="w-full sm:w-auto flex flex-col items-center justify-center group px-8 py-3.5 rounded-xl border-2 border-violet-200 bg-violet-50 text-violet-600 hover:bg-violet-100 hover:border-violet-300 transition-all active:scale-95">
-              <span className="font-bold text-lg">Harf Al</span>
-              <span className="text-xs font-semibold opacity-70 mt-0.5 group-hover:opacity-100 flex items-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM6.75 9.25a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" clipRule="evenodd" />
-                </svg>
-                100 Puan
-              </span>
-            </button>
+          {/* Kural 4: Cevaplama */}
+          <li className="flex items-start gap-4">
+            <div className="flex-shrink-0 bg-emerald-100 text-emerald-600 p-3 rounded-2xl">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="20" height="16" x="2" y="4" rx="2" ry="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/><path d="M7 16h10"/>
+              </svg>
+            </div>
+            <div className="pt-1">
+              <p className="text-slate-600 font-medium text-lg leading-snug">
+                <strong className="text-slate-800">"Cevapla"</strong> butonu ana süreyi durdurur, yazmanız için <strong className="text-emerald-600">20 saniye</strong> verir.
+              </p>
+            </div>
+          </li>
+        </ul>
+      </div>
 
-            {/* Cevapla Butonu */}
-            <button className="w-full sm:w-auto flex flex-col items-center justify-center px-10 py-3.5 rounded-xl bg-violet-500 text-white shadow-md shadow-violet-200 hover:bg-violet-600 hover:shadow-lg hover:shadow-violet-300 transition-all active:scale-95">
-              <span className="font-bold text-lg">Cevapla</span>
-              <span className="text-xs font-medium text-violet-100 mt-0.5">
-                Tahmini Gir
-              </span>
-            </button>
-          </div>
+      {/* 3. Aksiyon Butonu */}
+      <button className="w-full max-w-sm px-10 py-5 bg-violet-600 hover:bg-violet-700 text-white text-xl sm:text-2xl font-bold rounded-full shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-violet-300 transform hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3">
+        <span>Oyuna Başla</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+        </svg>
+      </button>
 
-        </div>
-      </main>
     </div>
   );
 }
