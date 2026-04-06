@@ -22,6 +22,7 @@ export default function GamePage() {
   const [isAnswering, setIsAnswering] = useState(false);
   const [userAnswer, setUserAnswer] = useState("");
   const [answerTimeLeft, setAnswerTimeLeft] = useState(20);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Oyun Sonu & Leaderboard State'leri
   const [showGameOverModal, setShowGameOverModal] = useState(false);
@@ -132,14 +133,14 @@ export default function GamePage() {
     fetchTodayQuestions();
   }, []);
 
-  // Ana oyun sayacı (isAnswering aktif değilse saymaya devam eder)
+  // Ana oyun sayacı (isAnswering veya isTransitioning aktif değilse saymaya devam eder)
   useEffect(() => {
     let timer: NodeJS.Timeout;
     
     // Yükleme varsa sayaç başlamasın
     if (isLoading || questions.length === 0 || !hasStarted) return;
 
-    if (isGameActive && !isAnswering && timeLeft > 0) {
+    if (isGameActive && !isAnswering && !isTransitioning && timeLeft > 0) {
       timer = setInterval(() => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
@@ -148,7 +149,7 @@ export default function GamePage() {
     }
 
     return () => clearInterval(timer);
-  }, [isGameActive, isAnswering, timeLeft, isLoading, questions.length, hasStarted]);
+  }, [isGameActive, isAnswering, isTransitioning, timeLeft, isLoading, questions.length, hasStarted]);
 
   // Cevaplama süresi 20 saniyeden geriye sayar
   useEffect(() => {
@@ -189,9 +190,11 @@ export default function GamePage() {
       setUserAnswer("");
       setIsAnswering(false);
       setAnswerTimeLeft(20);
+      setIsTransitioning(false); // Yeni soruya geçildi, süreyi tekrar akıtmaya başla
     } else {
       setIsGameActive(false);
       setIsAnswering(false);
+      setIsTransitioning(false); // Oyun bitti
     }
   };
 
@@ -200,6 +203,7 @@ export default function GamePage() {
     if (questions.length === 0 || !hasStarted) return;
 
     if (isGameActive && !isAnswering && revealedLetters.length === questions[currentQuestionIndex].word.length) {
+      setIsTransitioning(true); // Geri sayımı bu esnada durdur
       const timer = setTimeout(() => {
         handleNextQuestion();
       }, 2000);
