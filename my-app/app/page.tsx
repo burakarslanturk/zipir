@@ -755,29 +755,34 @@ export default function GamePage() {
             </div>
           </header>
 
-          <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pb-20 ${showGameOverModal ? 'blur-sm' : ''}`}>
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 flex flex-col items-center relative">
+          <main className={`flex-1 w-full max-w-4xl mx-auto px-2 sm:px-4 flex flex-col justify-center pb-20 ${showGameOverModal ? 'blur-sm' : ''}`}>
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 sm:p-10 flex flex-col items-center relative w-full">
               
               {/* Kart İçi Üst Bilgi Satırı: Soru Sayısı ve Süre */}
-              <div className="w-full flex justify-between items-center mb-8 border-b border-slate-100 pb-4 relative">
-                <div className="flex items-center gap-2 text-slate-500 font-medium">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
-                    <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                  </svg>
-                  <span>Soru: <strong className="text-slate-700 ml-1">{currentQuestionIndex + 1} / {questions.length}</strong></span>
+              <div className="w-full flex flex-col gap-3 mb-8 border-b border-slate-100 pb-4">
+                {/* Üst Satır: Soru Sayısı ve Ana Süre */}
+                <div className="w-full flex justify-between items-center">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-slate-500 font-medium text-sm sm:text-base">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 sm:w-5 sm:h-5 shrink-0">
+                      <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span className="whitespace-nowrap">Soru: <strong className="text-slate-700 ml-1">{currentQuestionIndex + 1} / {questions.length}</strong></span>
+                  </div>
+                  
+                  <div className={`flex items-center gap-1.5 sm:gap-2 font-mono text-base sm:text-xl ${timeLeft <= 30 ? "text-red-500 font-bold animate-pulse scale-105 transition-transform" : "text-slate-700 font-bold"}`}>
+                    <span className="text-lg sm:text-2xl">⏱️</span>
+                    <span className="w-12 sm:w-14 text-right">{formatTime(timeLeft)}</span>
+                  </div>
                 </div>
-                
-                {/* 20 Saniyelik Cevaplama Süresi - Soru ve Ana Süre Arasında */}
+
+                {/* Alt Satır: 20 Saniyelik Cevaplama Süresi */}
                 {isAnswering && (
-                  <div className="absolute left-1/2 transform -translate-x-1/2 bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-full font-bold text-sm flex items-center gap-1.5 shadow-sm animate-pulse whitespace-nowrap">
-                    <span>⏱️</span> Kalan Cevap Süresi: {answerTimeLeft} sn
+                  <div className="flex justify-center w-full mt-1">
+                    <div className="bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-full font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-sm animate-pulse whitespace-nowrap">
+                      <span>⌛</span> Kalan Cevap Süresi: {answerTimeLeft} sn
+                    </div>
                   </div>
                 )}
-                
-                <div className={`flex items-center gap-2 font-mono text-lg sm:text-xl ${timeLeft <= 30 ? "text-red-500 font-bold animate-pulse scale-105 transition-transform" : "text-slate-700 font-bold"}`}>
-                  <span className="text-xl sm:text-2xl">⏱️</span>
-                  <span className="w-14 text-right">{formatTime(timeLeft)}</span>
-                </div>
               </div>
               
               {/* Soru Değeri Etiketi */}
@@ -794,7 +799,7 @@ export default function GamePage() {
 
               {/* Harf Kutuları */}
               <div 
-                className={`flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10 cursor-text ${isShaking || answerStatus === "wrong" ? "animate-shake" : ""}`}
+                className={`flex flex-row flex-nowrap justify-center items-center w-full cursor-text ${currentQuestion.word.length > 8 ? 'gap-1' : 'gap-2'} sm:gap-2 md:gap-3 mb-10 ${isShaking || answerStatus === "wrong" ? "animate-shake" : ""}`}
                 onClick={() => {
                   if (isAnswering) document.getElementById('hidden-answer-input')?.focus();
                 }}
@@ -838,12 +843,12 @@ export default function GamePage() {
                     return (
                       <div
                         key={index}
-                        className={`relative w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl border-2 text-2xl sm:text-3xl font-bold uppercase transition-all duration-300 ${boxStyle}`}
+                        className={`relative flex-1 max-w-[3rem] md:max-w-[3.5rem] aspect-square flex items-center justify-center rounded-md sm:rounded-xl border-2 font-bold uppercase transition-all duration-300 ${currentQuestion.word.length > 8 ? 'text-lg sm:text-2xl' : 'text-2xl sm:text-3xl'} ${boxStyle}`}
                       >
                         {displayChar}
                         {/* Aktif kutudayken küçük bir imleç işareti göster */}
                         {isAnswering && isActiveBox && (
-                          <div className="absolute w-5 h-1 bg-violet-400 bottom-2 rounded-full animate-pulse"></div>
+                          <div className="absolute w-3 sm:w-5 h-1 bg-violet-400 bottom-1 sm:bottom-2 rounded-full animate-pulse"></div>
                         )}
                       </div>
                     );
@@ -899,7 +904,7 @@ export default function GamePage() {
                     
                     <button 
                       type="submit"
-                      className="px-12 py-3.5 bg-violet-600 text-white font-bold rounded-xl shadow-md hover:bg-violet-700 transition-all active:scale-95 text-lg"
+                      className="w-full sm:w-auto px-12 py-3.5 bg-violet-600 text-white font-bold rounded-xl shadow-md hover:bg-violet-700 transition-all active:scale-95 text-lg"
                     >
                       Gönder
                     </button>
