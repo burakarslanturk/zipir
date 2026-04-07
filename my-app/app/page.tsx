@@ -794,7 +794,7 @@ export default function GamePage() {
 
               {/* Harf Kutuları */}
               <div 
-                className={`flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10 cursor-text ${isShaking || answerStatus === "wrong" ? "animate-shake" : ""}`}
+                className={`flex flex-row flex-nowrap justify-center items-center w-full gap-${currentQuestion.word.length > 8 ? '1' : '2'} sm:gap-2 mb-10 cursor-text px-1 ${isShaking || answerStatus === "wrong" ? "animate-shake" : ""}`}
                 onClick={() => {
                   if (isAnswering) document.getElementById('hidden-answer-input')?.focus();
                 }}
@@ -835,10 +835,15 @@ export default function GamePage() {
                       boxStyle = "bg-violet-50/50 border-violet-400 shadow-inner ring-4 ring-violet-200/50"; // Odaklanılan
                     }
 
+                    const isManyLetters = currentQuestion.word.length > 8;
+                    const sizeClasses = isManyLetters
+                      ? "text-lg sm:text-2xl border"
+                      : "text-2xl sm:text-3xl border-2";
+
                     return (
                       <div
                         key={index}
-                        className={`relative w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-xl border-2 text-2xl sm:text-3xl font-bold uppercase transition-all duration-300 ${boxStyle}`}
+                        className={`relative flex-1 min-w-0 max-w-[3rem] sm:max-w-[4rem] aspect-square flex items-center justify-center rounded-lg sm:rounded-xl font-bold uppercase transition-all duration-300 ${sizeClasses} p-0 m-0 ${boxStyle}`}
                       >
                         {displayChar}
                         {/* Aktif kutudayken küçük bir imleç işareti göster */}
