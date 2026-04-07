@@ -50,6 +50,7 @@ function NextGameTimer() {
 export default function GamePage() {
   // Splash ve oyun başlatma kontrolü
   const [hasStarted, setHasStarted] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
 
   // Veri durumu state'leri
   const [questions, setQuestions] = useState<any[]>([]);
@@ -83,6 +84,22 @@ export default function GamePage() {
       return () => clearTimeout(timer);
     }
   }, [score, questions.length]);
+
+  // Geri sayım döngüsü
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown > 1) {
+      const timer = setTimeout(() => setCountdown((prev) => (prev !== null ? prev - 1 : null)), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      // "1" animasyonu biter bitmez (450ms) overlay kapanır, oyun başlar
+      const timer = setTimeout(() => {
+        setCountdown(null);
+        setHasStarted(true);
+      }, 450);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
 
   // Oyun Sonu & Leaderboard State'leri
   const [showGameOverModal, setShowGameOverModal] = useState(false);
@@ -438,6 +455,7 @@ export default function GamePage() {
 
   if (!hasStarted) {
     return (
+      <>
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-3 font-sans text-slate-800">
         
         {/* 1. Marka Alanı */}
@@ -526,7 +544,7 @@ export default function GamePage() {
 
         {/* 3. Aksiyon Butonu */}
         <button 
-          onClick={() => setHasStarted(true)}
+          onClick={() => setCountdown(3)}
           className="w-full max-w-sm px-6 py-4 bg-violet-600 hover:bg-violet-700 text-white text-lg sm:text-xl font-bold rounded-2xl shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-violet-300 transform hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-2">
           <span>Oyuna Başla</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -535,6 +553,39 @@ export default function GamePage() {
         </button>
 
       </div>
+
+      {/* Geri Sayım Overlay */}
+      {countdown !== null && countdown > 0 && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-white/90 backdrop-blur-sm">
+          {/* Rakam */}
+          <div key={countdown} className="relative flex items-center justify-center">
+            {/* Dışa yayılan hale (ripple) */}
+            <span
+              aria-hidden
+              className="absolute font-nunito font-black text-violet-400 text-8xl md:text-9xl select-none leading-none pointer-events-none animate-countdown-ripple"
+            >
+              {countdown}
+            </span>
+            {/* Ana rakam */}
+            <span className="relative font-nunito font-black text-violet-600 text-8xl md:text-9xl select-none leading-none tracking-tight drop-shadow-sm animate-countdown-pop">
+              {countdown}
+            </span>
+          </div>
+
+          {/* Alt ipucu noktaları */}
+          <div className="flex gap-2">
+            {[3, 2, 1].map((n) => (
+              <span
+                key={n}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  n >= countdown ? "bg-violet-500 scale-125" : "bg-slate-200"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+      </>
     );
   }
 
