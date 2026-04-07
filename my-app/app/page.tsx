@@ -1086,39 +1086,43 @@ export default function GamePage() {
           )}
 
           {/* OYUN ANA EKRANI (Ana Tasarım) */}
-          <header className={`w-full max-w-4xl mx-auto px-4 pt-4 pb-0 mb-3 flex items-center justify-between space-x-2 ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
-            {/* Sol: Ayarlar Butonu */}
-            <div className="flex-1 flex justify-start">
-              <button
-                onClick={() => setShowSettingsModal(true)}
-                aria-label="Ayarlar"
-                className="p-2 bg-white rounded-xl shadow-sm border border-violet-100 text-violet-600 active:scale-95 transition-all"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-              </button>
-            </div>
-
-            {/* Orta: Logo */}
-            <div className="flex justify-center shrink-0">
-              <h1 className="text-4xl sm:text-5xl font-nunito font-black tracking-tight text-violet-600 scale-90 sm:scale-100 transition-transform origin-center">
-                ZIPIR<span className="text-violet-400 italic">!</span>
-              </h1>
-            </div>
-
-            {/* Sağ: Puan */}
-            <div className="flex-1 flex justify-end">
-              <div className="flex items-center py-2 px-5 bg-white shadow-sm rounded-xl border border-slate-100">
-                <div className="text-base font-semibold text-slate-600 flex items-center">
-                  Puan: <span className={`text-violet-600 font-bold text-lg sm:text-xl ml-1.5 transition-transform duration-300 ${isScoreAnimating ? 'scale-[1.3]' : 'scale-100'}`}>{score}</span>
+          <div className="fixed top-0 left-0 w-full z-40 pt-2 sm:pt-4 flex justify-center pointer-events-none">
+            <div className="w-full max-w-4xl px-4 flex justify-center">
+              <header className={`pointer-events-auto w-full bg-white/40 backdrop-blur-md shadow-sm border border-slate-200/60 rounded-2xl px-3 py-3 sm:px-4 flex items-center justify-between gap-1 sm:gap-4 transition-all duration-300 ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
+                {/* Sol: Ayarlar Butonu */}
+                <div className="flex-1 flex justify-start shrink-0">
+                  <button
+                    onClick={() => setShowSettingsModal(true)}
+                    aria-label="Ayarlar"
+                    className="p-1.5 sm:p-2 bg-white rounded-xl shadow-sm border border-violet-100 text-violet-600 active:scale-95 transition-all"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </button>
                 </div>
-              </div>
-            </div>
-          </header>
 
-          <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pb-20 ${isAnswering ? 'max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
+                {/* Orta: Logo */}
+                <div className="flex justify-center shrink-1 px-1 sm:px-2">
+                  <h1 className="text-3xl sm:text-5xl font-nunito font-black tracking-tight text-violet-600 transition-transform origin-center">
+                    ZIPIR<span className="text-violet-400 italic">!</span>
+                  </h1>
+                </div>
+
+                {/* Sağ: Puan */}
+                <div className="flex-1 flex justify-end shrink-0">
+                  <div className="flex items-center py-1.5 px-3 sm:py-2 sm:px-5 bg-white shadow-sm rounded-xl border border-slate-100">
+                    <div className="text-sm sm:text-base font-semibold text-slate-600 flex items-center">
+                      Puan: <span className={`text-violet-600 font-bold text-base sm:text-xl ml-1 sm:ml-1.5 transition-transform duration-300 ${isScoreAnimating ? 'scale-[1.3]' : 'scale-100'}`}>{score}</span>
+                    </div>
+                  </div>
+                </div>
+              </header>
+            </div>
+          </div>
+
+          <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pt-28 sm:pt-36 pb-20 ${isAnswering ? 'max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 flex flex-col items-center relative">
               
               {/* Kart İçi Üst Bilgi Satırı: Soru Sayısı ve Süre */}
