@@ -47,6 +47,63 @@ function NextGameTimer() {
   );
 }
 
+const VirtualKeyboard = ({
+  onKeyPress,
+  onBackspace,
+  onSubmit,
+}: {
+  onKeyPress: (key: string) => void;
+  onBackspace: () => void;
+  onSubmit: () => void;
+}) => {
+  const rows = [
+    ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "Ğ", "Ü"],
+    ["A", "S", "D", "F", "G", "H", "J", "K", "L", "Ş", "İ"],
+    ["Z", "X", "C", "V", "B", "N", "M", "Ö", "Ç"]
+  ];
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 w-full bg-slate-200/95 backdrop-blur-md p-2 pb-8 sm:hidden z-50 animate-in slide-in-from-bottom border-t border-slate-300 shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
+      <div className="flex flex-col gap-2 max-w-lg mx-auto">
+        {rows.map((row, rowIndex) => (
+          <div key={rowIndex} className="flex justify-center gap-1.5">
+            {rowIndex === 2 && (
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); onBackspace(); }}
+                className="flex-[1.5] bg-slate-400 text-white font-bold rounded-lg py-3.5 px-2 text-xs active:scale-95 transition-transform flex items-center justify-center shadow-sm"
+              >
+                SİL
+              </button>
+            )}
+            
+            {row.map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={(e) => { e.preventDefault(); onKeyPress(key); }}
+                className="flex-1 bg-white text-violet-700 font-bold text-sm rounded-lg py-3.5 shadow-sm active:scale-95 active:bg-violet-100 active:text-violet-800 transition-all flex items-center justify-center border border-slate-100"
+              >
+                {key}
+              </button>
+            ))}
+
+            {rowIndex === 2 && (
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); onSubmit(); }}
+                className="flex-[2] bg-violet-600 text-white font-bold rounded-lg py-3.5 px-2 text-xs active:scale-95 transition-transform shadow-md flex items-center justify-center"
+              >
+                GÖNDER
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default function GamePage() {
   // Splash ve oyun başlatma kontrolü
   const [hasStarted, setHasStarted] = useState(false);
@@ -77,6 +134,15 @@ export default function GamePage() {
   const pendingTimeoutExpiredRef = useRef(false);
 
   // Puan değiştiğinde animasyon tetiklemek için etki
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize(); // set initial value
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     if (score > 0 || (score === 0 && questions.length > 0)) {
       setIsScoreAnimating(true);
@@ -622,8 +688,8 @@ export default function GamePage() {
   };
 
   // Cevabı Gönderme
-  const handleSubmitAnswer = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmitAnswer = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     
     // Eksik harf kontrolü
     const emptyBoxesCount = currentQuestion.word.length - revealedLetters.length;
@@ -663,9 +729,24 @@ export default function GamePage() {
         setIsShaking(false);
         setAnswerStatus("idle");
         setUserAnswer("");
-        document.getElementById('hidden-answer-input')?.focus();
+        if (!isMobile) {
+          document.getElementById('hidden-answer-input')?.focus();
+        }
       }, 500);
     }
+  };
+
+  const handleVirtualKeyPress = (key: string) => {
+    if (questions.length === 0 || currentQuestionIndex >= questions.length) return;
+    const currentWordLength = questions[currentQuestionIndex].word.length;
+    const emptyBoxesCount = currentWordLength - revealedLetters.length;
+    if (userAnswer.length < emptyBoxesCount) {
+      setUserAnswer((prev) => prev + key);
+    }
+  };
+
+  const handleVirtualBackspace = () => {
+    setUserAnswer((prev) => prev.slice(0, -1));
   };
 
   const handleSaveScore = async (e: React.FormEvent) => {
@@ -855,7 +936,7 @@ export default function GamePage() {
             </div>
           </header>
 
-          <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pb-20 ${showGameOverModal ? 'blur-sm' : ''}`}>
+          <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pb-20 ${isAnswering ? 'max-sm:pb-64' : ''} ${showGameOverModal ? 'blur-sm' : ''}`}>
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 flex flex-col items-center relative">
               
               {/* Kart İçi Üst Bilgi Satırı: Soru Sayısı ve Süre */}
@@ -896,7 +977,7 @@ export default function GamePage() {
               <div 
                 className={`flex flex-row flex-nowrap justify-center items-center w-full gap-${currentQuestion.word.length > 8 ? '1' : '2'} sm:gap-2 mb-10 cursor-text px-1 ${isShaking || answerStatus === "wrong" ? "animate-shake" : ""}`}
                 onClick={() => {
-                  if (isAnswering) document.getElementById('hidden-answer-input')?.focus();
+                  if (isAnswering && !isMobile) document.getElementById('hidden-answer-input')?.focus();
                 }}
               >
                 {(() => {
@@ -983,11 +1064,11 @@ export default function GamePage() {
               ) : (
                 <div className="w-full flex flex-col items-center mt-4 relative">
                   <form onSubmit={handleSubmitAnswer} className="w-full flex flex-col items-center gap-3 relative">
-                    {/* Gizli input. Klavyeyi tetikler ve metni güvenilir şekilde yakalar. (Backspace dahil her şeyi çözer) */}
+                    {/* Gizli input. Masaüstünde klavyeyi tetikler ve metni güvenilir şekilde yakalar. Mobil cihazlarda gizlenmiştir. */}
                     <input
                       id="hidden-answer-input"
                       type="text"
-                      autoFocus
+                      autoFocus={!isMobile}
                       autoComplete="off"
                       autoCorrect="off"
                       spellCheck="false"
@@ -999,12 +1080,12 @@ export default function GamePage() {
                         const filtered = val.replace(/[^a-zA-ZçğıöşüÇĞİÖŞÜ]/g, '');
                         setUserAnswer(filtered.toLocaleUpperCase('tr-TR'));
                       }}
-                      className="absolute opacity-0 w-0 h-0 -z-10 focus:outline-none cursor-default"
+                      className="absolute opacity-0 w-0 h-0 -z-10 focus:outline-none cursor-default max-sm:hidden"
                     />
                     
                     <button 
                       type="submit"
-                      className="px-12 py-3.5 bg-violet-600 text-white font-bold rounded-xl shadow-md hover:bg-violet-700 transition-all active:scale-95 text-lg"
+                      className="px-12 py-3.5 bg-violet-600 text-white font-bold rounded-xl shadow-md hover:bg-violet-700 transition-all active:scale-95 text-lg max-sm:hidden"
                     >
                       Gönder
                     </button>
@@ -1013,6 +1094,15 @@ export default function GamePage() {
               )}
             </div>
           </main>
+
+          {/* Sanal Klavye - Sadece mobil cihazlarda ve cevaplama aşamasındayken gösterilir */}
+          {isAnswering && isMobile && (
+            <VirtualKeyboard 
+              onKeyPress={handleVirtualKeyPress}
+              onBackspace={handleVirtualBackspace}
+              onSubmit={() => handleSubmitAnswer()}
+            />
+          )}
         </>
       )}
     </div>
