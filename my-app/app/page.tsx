@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
 
 function NextGameTimer() {
@@ -64,12 +64,16 @@ export default function GamePage() {
   
   // Cevaplama aşaması için eklenen state'ler
   const [isAnswering, setIsAnswering] = useState(false);
+  const [answerStartTime, setAnswerStartTime] = useState<number | null>(null);
   const [userAnswer, setUserAnswer] = useState("");
   const [answerTimeLeft, setAnswerTimeLeft] = useState(20);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const [answerStatus, setAnswerStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const [isScoreAnimating, setIsScoreAnimating] = useState(false);
+
+  // Sayfa kapalıyken cevap süresi dolduysa yükleme sonrası gecikmeyle işlem tetiklemek için
+  const pendingTimeoutExpiredRef = useRef(false);
 
   // Puan değiştiğinde animasyon tetiklemek için etki
   useEffect(() => {
@@ -135,9 +139,10 @@ export default function GamePage() {
           return;
         }
 
+        let sorted: any[] = [];
         if (data) {
           // Gelen soruları cevap uzunluğuna göre sırala (4 harfliden 10 harfliye)
-          const sorted = data.sort((a, b) => a.word.length - b.word.length);
+          sorted = data.sort((a, b) => a.word.length - b.word.length);
           setQuestions(sorted);
         }
 
@@ -169,8 +174,32 @@ export default function GamePage() {
               }
               else {
                 setIsGameActive(savedState.isGameActive ?? true);
+
+                // Cevaplama modundayken sayfa yenilendiyse zaman damgasıyla kontrol et
+                if (savedState.isAnswering && savedState.answerStartTime) {
+                  const elapsedSeconds = Math.floor((Date.now() - savedState.answerStartTime) / 1000);
+
+                  if (elapsedSeconds < 20) {
+                    // Süre henüz dolmamış: kaldığı yerden devam et
+                    setIsAnswering(true);
+                    setAnswerStartTime(savedState.answerStartTime);
+                    setAnswerTimeLeft(20 - elapsedSeconds);
+                  } else {
+                    // Süre sayfa kapalıyken dolmuş: ceza uygula ve sonraki soruya geç
+                    const savedIndex = savedState.currentQuestionIndex ?? 0;
+                    const word = sorted[savedIndex]?.word ?? "";
+                    const savedRevealed: number[] = savedState.revealedLetters ?? [];
+                    const penalty = (word.length - savedRevealed.length) * 100;
+                    setScore((savedState.score ?? 0) - penalty);
+                    setRevealedLetters(Array.from({ length: word.length }, (_, i) => i));
+                    setIsTransitioning(true);
+                    setAnswerStatus("wrong");
+                    pendingTimeoutExpiredRef.current = true;
+                  }
+                }
+
                 // Oyun yarım kaldıysa, oynamaya devam etsin Splash görmeden
-                if (savedState.currentQuestionIndex > 0 || savedState.score > 0 || (savedState.timeLeft && savedState.timeLeft < 240)) {
+                if (savedState.currentQuestionIndex > 0 || savedState.score > 0 || (savedState.timeLeft && savedState.timeLeft < 240) || savedState.isAnswering) {
                   setHasStarted(true);
                 }
               }
@@ -234,6 +263,7 @@ export default function GamePage() {
       setRevealedLetters([]);
       setUserAnswer("");
       setIsAnswering(false);
+      setAnswerStartTime(null);
       setAnswerTimeLeft(20);
       setIsTransitioning(false); // Yeni soruya geçildi, süreyi tekrar akıtmaya başla
       setAnswerStatus("idle");
@@ -322,11 +352,13 @@ export default function GamePage() {
       isGameActive,
       showGameOverModal,
       showLeaderboard,
-      nickname
+      nickname,
+      isAnswering,
+      answerStartTime
     };
 
     localStorage.setItem("kelime_oyunu_save", JSON.stringify(gameState));
-  }, [score, timeLeft, currentQuestionIndex, revealedLetters, isGameActive, showGameOverModal, showLeaderboard, nickname, isLoading, questions.length, hasStarted]);
+  }, [score, timeLeft, currentQuestionIndex, revealedLetters, isGameActive, showGameOverModal, showLeaderboard, nickname, isAnswering, answerStartTime, isLoading, questions.length, hasStarted]);
 
   // Oyun bitiş kontrolü
   useEffect(() => {
@@ -334,6 +366,18 @@ export default function GamePage() {
       setShowGameOverModal(true);
     }
   }, [isGameActive, questions.length, showLeaderboard]);
+
+  // Sayfa kapalıyken cevap süresi dolduysa: sorular yüklendikten sonra doğru cevabı gösterip geç
+  useEffect(() => {
+    if (pendingTimeoutExpiredRef.current && questions.length > 0 && hasStarted && !isLoading) {
+      pendingTimeoutExpiredRef.current = false;
+      const timer = setTimeout(() => {
+        handleNextQuestion();
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions.length, hasStarted, isLoading]);
 
   // Klavye (Space) ile 'Cevapla' butonunu tetikleme
   useEffect(() => {
@@ -346,6 +390,7 @@ export default function GamePage() {
            if (revealedLetters.length !== currentWordLength) {
              e.preventDefault(); // Sayfanın kaymasını kesinlikle engelle
              setIsAnswering(true);
+             setAnswerStartTime(Date.now());
              setAnswerTimeLeft(20);
            }
         }
@@ -518,6 +563,7 @@ export default function GamePage() {
   const handleAnswerClick = () => {
     if (!isGameActive || revealedLetters.length === currentQuestion.word.length) return;
     setIsAnswering(true);
+    setAnswerStartTime(Date.now());
     setAnswerTimeLeft(20);
   };
 
@@ -694,7 +740,7 @@ export default function GamePage() {
               <div className="bg-white rounded-2xl p-6 sm:p-10 w-full max-w-md shadow-xl border border-slate-100 relative max-h-[90vh] overflow-y-auto">
                 
                 <h3 className="text-3xl font-black text-center text-slate-800 mb-2">Oyun Bitti!</h3>
-                <p className="text-center text-slate-500 mb-8">İşte bugünkü harika sonucun:</p>
+                <p className="text-center text-slate-500 mb-8">İşte bugünkü sonucun:</p>
                 
                 <div className="flex justify-center gap-6 mb-8">
                   <div className="text-center">
