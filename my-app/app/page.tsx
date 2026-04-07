@@ -759,7 +759,7 @@ export default function GamePage() {
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 flex flex-col items-center relative">
               
               {/* Kart İçi Üst Bilgi Satırı: Soru Sayısı ve Süre */}
-              <div className="w-full flex justify-between items-center mb-8 border-b border-slate-100 pb-4 relative">
+              <div className="flex flex-wrap sm:flex-nowrap justify-between items-center w-full mb-6 pb-3 border-b border-slate-100 relative">
                 <div className="flex items-center gap-2 text-slate-500 font-medium">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
                     <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
@@ -769,7 +769,7 @@ export default function GamePage() {
                 
                 {/* 20 Saniyelik Cevaplama Süresi - Soru ve Ana Süre Arasında */}
                 {isAnswering && (
-                  <div className="absolute left-1/2 transform -translate-x-1/2 bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-full font-bold text-sm flex items-center gap-1.5 shadow-sm animate-pulse whitespace-nowrap">
+                  <div className="w-full flex justify-center order-last mt-4 sm:w-auto sm:order-none sm:mt-0 sm:absolute sm:left-1/2 sm:-translate-x-1/2 bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-full font-bold text-sm items-center gap-1.5 shadow-sm animate-pulse whitespace-nowrap">
                     <span>⏱️</span> Kalan Cevap Süresi: {answerTimeLeft} sn
                   </div>
                 )}
