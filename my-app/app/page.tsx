@@ -129,7 +129,7 @@ export default function GamePage() {
   const [isAnswering, setIsAnswering] = useState(false);
   const [answerStartTime, setAnswerStartTime] = useState<number | null>(null);
   const [userAnswer, setUserAnswer] = useState("");
-  const [answerTimeLeft, setAnswerTimeLeft] = useState(20);
+  const [answerTimeLeft, setAnswerTimeLeft] = useState(30);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const [answerStatus, setAnswerStatus] = useState<"idle" | "correct" | "wrong">("idle");
@@ -311,11 +311,11 @@ export default function GamePage() {
                 if (savedState.isAnswering && savedState.answerStartTime) {
                   const elapsedSeconds = Math.floor((Date.now() - savedState.answerStartTime) / 1000);
 
-                  if (elapsedSeconds < 20) {
+                  if (elapsedSeconds < 30) {
                     // Süre henüz dolmamış: kaldığı yerden devam et
                     setIsAnswering(true);
                     setAnswerStartTime(savedState.answerStartTime);
-                    setAnswerTimeLeft(20 - elapsedSeconds);
+                    setAnswerTimeLeft(30 - elapsedSeconds);
                   } else {
                     // Süre sayfa kapalıyken dolmuş: ceza uygula ve sonraki soruya geç
                     const savedIndex = savedState.currentQuestionIndex ?? 0;
@@ -367,7 +367,7 @@ export default function GamePage() {
     return () => clearInterval(timer);
   }, [isGameActive, isAnswering, isTransitioning, timeLeft, isLoading, questions.length, hasStarted]);
 
-  // Cevaplama süresi 20 saniyeden geriye sayar
+  // Cevaplama süresi 30 saniyeden geriye sayar
   useEffect(() => {
     let timer: NodeJS.Timeout;
 
@@ -394,7 +394,7 @@ export default function GamePage() {
       setUserAnswer("");
       setIsAnswering(false);
       setAnswerStartTime(null);
-      setAnswerTimeLeft(20);
+      setAnswerTimeLeft(30);
       setIsTransitioning(false); // Yeni soruya geçildi, süreyi tekrar akıtmaya başla
       setAnswerStatus("idle");
       
@@ -523,7 +523,7 @@ export default function GamePage() {
              e.preventDefault(); // Sayfanın kaymasını kesinlikle engelle
              setIsAnswering(true);
              setAnswerStartTime(Date.now());
-             setAnswerTimeLeft(20);
+             setAnswerTimeLeft(30);
            }
         }
       }
@@ -637,7 +637,7 @@ export default function GamePage() {
               </div>
               <div className="pt-0.5">
                 <p className="text-slate-600 font-medium text-sm sm:text-base leading-tight">
-                  <strong className="text-slate-800">"Cevapla"</strong> dedikten sonra ana süre durur, <strong className="text-emerald-600">20 saniyelik cevaplama süreniz</strong> başlar ve süre bitene kadar cevap deneyebilirsiniz.
+                  <strong className="text-slate-800">"Cevapla"</strong> dedikten sonra ana süre durur, <strong className="text-emerald-600">30 saniyelik cevaplama süreniz</strong> başlar ve süre bitene kadar cevap deneyebilirsiniz.
                 </p>
               </div>
             </li>
@@ -733,7 +733,7 @@ export default function GamePage() {
     if (!isGameActive || revealedLetters.length === currentQuestion.word.length) return;
     setIsAnswering(true);
     setAnswerStartTime(Date.now());
-    setAnswerTimeLeft(20);
+    setAnswerTimeLeft(30);
   };
 
   // Cevabı Gönderme
@@ -990,7 +990,7 @@ export default function GamePage() {
                           </svg>
                         </div>
                         <p className="text-slate-600 text-sm leading-snug pt-0.5">
-                          <strong className="text-slate-800">"Cevapla"</strong> dedikten sonra ana süre durur, <strong className="text-emerald-600">20 saniyelik cevaplama süreniz</strong> başlar.
+                          <strong className="text-slate-800">"Cevapla"</strong> dedikten sonra ana süre durur, <strong className="text-emerald-600">30 saniyelik cevaplama süreniz</strong> başlar.
                         </p>
                       </li>
                       <li className="flex items-start gap-3">
@@ -1170,7 +1170,7 @@ export default function GamePage() {
                   <span>Soru: <strong className="text-slate-700 ml-1">{currentQuestionIndex + 1} / {questions.length}</strong></span>
                 </div>
                 
-                {/* 20 Saniyelik Cevaplama Süresi - Soru ve Ana Süre Arasında */}
+                {/* 30 Saniyelik Cevaplama Süresi - Soru ve Ana Süre Arasında */}
                 {isAnswering && (
                   <div className="w-full flex justify-center order-last mt-4 sm:w-auto sm:order-none sm:mt-0 sm:absolute sm:left-1/2 sm:-translate-x-1/2 bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-full font-bold text-sm items-center gap-1.5 shadow-sm animate-pulse whitespace-nowrap">
                     <span>⏱️</span> Kalan Cevap Süresi: {answerTimeLeft} sn

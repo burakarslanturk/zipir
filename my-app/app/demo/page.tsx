@@ -49,7 +49,7 @@ export default function GamePageDemo() {
   const [revealedLetters, setRevealedLetters] = useState<number[]>([]);
   const [isAnswering, setIsAnswering] = useState(false);
   const [userAnswer, setUserAnswer] = useState("");
-  const [answerTimeLeft, setAnswerTimeLeft] = useState(20);
+  const [answerTimeLeft, setAnswerTimeLeft] = useState(30);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const [answerStatus, setAnswerStatus] = useState<"idle" | "correct" | "wrong">("idle");
@@ -107,7 +107,7 @@ export default function GamePageDemo() {
 
   const handleNextQuestion = () => {
     setCurrentQuestionIndex((prev) => {
-      setRevealedLetters([]); setUserAnswer(""); setIsAnswering(false); setAnswerTimeLeft(20); setIsTransitioning(false); setAnswerStatus("idle");
+      setRevealedLetters([]); setUserAnswer(""); setIsAnswering(false); setAnswerTimeLeft(30); setIsTransitioning(false); setAnswerStatus("idle");
       return prev < questions.length - 1 ? prev + 1 : (setIsGameActive(false), prev);
     });
   };
@@ -140,7 +140,7 @@ export default function GamePageDemo() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Space" && isGameActive && !isAnswering && questions.length > 0 && currentQuestionIndex < questions.length) {
         if (revealedLetters.length !== questions[currentQuestionIndex].word.length) {
-          e.preventDefault(); setIsAnswering(true); setAnswerTimeLeft(20);
+          e.preventDefault(); setIsAnswering(true); setAnswerTimeLeft(30);
         }
       }
     };
@@ -174,7 +174,7 @@ export default function GamePageDemo() {
 
   const handleAnswerClick = () => {
     if (!isGameActive || revealedLetters.length === currentQuestion.word.length) return;
-    setIsAnswering(true); setAnswerTimeLeft(20);
+    setIsAnswering(true); setAnswerTimeLeft(30);
   };
 
   const handleSubmitAnswer = (e: React.FormEvent) => {
@@ -237,7 +237,7 @@ export default function GamePageDemo() {
               <span>Soru: <strong className="text-slate-700 ml-1">{currentQuestionIndex + 1} / {questions.length}</strong></span>
             </div>
             
-            {/* 20 Saniyelik Cevaplama Süresi - Soru ve Ana Süre Arasında */}
+            {/* 30 Saniyelik Cevaplama Süresi - Soru ve Ana Süre Arasında */}
             {isAnswering && (
               <div className="w-full flex justify-center order-last mt-4 sm:w-auto sm:order-none sm:mt-0 sm:absolute sm:left-1/2 sm:-translate-x-1/2 bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-full font-bold text-sm items-center gap-1.5 shadow-sm animate-pulse whitespace-nowrap">
                 <span>⏱️</span> Kalan Cevap Süresi: {answerTimeLeft} sn
