@@ -2,6 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
+import CryptoJS from "crypto-js";
+
+// Şifre çözmek için API'dekiyle aynı anahtarı kullanmalıyız (.env'den).
+const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY as string;
 
 function NextGameTimer() {
   const [timeLeftStr, setTimeLeftStr] = useState<string>("--:--:--");
@@ -216,21 +220,35 @@ export default function GamePage() {
         const dd = String(today.getUTCDate()).padStart(2, "0");
         const formattedDate = `${yyyy}-${mm}-${dd}`;
 
-        const { data, error } = await supabase
-          .from("questions")
-          .select("*")
-          .eq("game_date", formattedDate)
-          .limit(14);
+        const response = await fetch('/api/questions', { cache: 'no-store' });
+        if (!response.ok) {
+          console.error("Sorular alınırken HTTP hatası:", response.statusText);
+          return;
+        }
 
-        if (error) {
-          console.error("Sorular alınırken hata:", error);
+        const resData = await response.json();
+        
+        if (resData.error) {
+          console.error("Sorular API'den alınırken hata:", resData.error);
           return;
         }
 
         let sorted: any[] = [];
-        if (data) {
+        if (resData.questions && resData.questions.length > 0) {
+          // Gelen şifreli kelimeleri cihazda (client'ta) çözüyoruz
+          const decryptedData = resData.questions.map((q: any) => {
+            try {
+              const bytes = CryptoJS.AES.decrypt(q.word, ENCRYPTION_KEY);
+              const originalWord = bytes.toString(CryptoJS.enc.Utf8);
+              return { ...q, word: originalWord };
+            } catch (err) {
+              console.error("Şifre çözme hatası:", err);
+              return q;
+            }
+          });
+
           // Gelen soruları cevap uzunluğuna göre sırala (4 harfliden 10 harfliye)
-          sorted = data.sort((a, b) => a.word.length - b.word.length);
+          sorted = decryptedData.sort((a: any, b: any) => a.word.length - b.word.length);
           setQuestions(sorted);
         }
 
