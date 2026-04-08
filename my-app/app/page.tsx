@@ -255,13 +255,34 @@ export default function GamePage() {
 
         // LocalStorage Kontrolü ve Yükleme
         const savedRaw = localStorage.getItem("kelime_oyunu_save");
+        let savedState = null;
+        
         if (savedRaw) {
           try {
-            // Şifreyi çöz
+            // Önce verinin yeni şifreli formatta olduğunu varsayıp çözmeyi deneyelim
             const bytes = CryptoJS.AES.decrypt(savedRaw, ENCRYPTION_KEY);
             const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
-            const savedState = JSON.parse(decryptedString);
+            
+            if (!decryptedString) {
+              throw new Error("Şifreli veri boş veya bozuk");
+            }
+            savedState = JSON.parse(decryptedString);
+            
+          } catch (e) {
+            // Şifre çözülemiyorsa (Malformed UTF-8 hatası vb.) bu büyük ihtimalle 
+            // güncelleme öncesinden kalma eski (şifresiz) veridir.
+            console.warn("Şifreli veri okunamadı, eski formata bakılıyor...");
+            try {
+              // Eski şifresiz düz JSON verisi ise bunu okumayı dene
+              savedState = JSON.parse(savedRaw);
+            } catch (fallbackErr) {
+              // Ne şifreli ne şifresiz, veri tamamen bozulmuş demektir
+              console.error("LocalStorage verisi tamamen bozuk, temizleniyor...");
+              localStorage.removeItem("kelime_oyunu_save");
+            }
+          }
 
+          if (savedState) {
             // Sadece bugünün tarihi ise yükle, değilse yoksay
             if (savedState.date === formattedDate) {
               setScore(savedState.score ?? 0);
@@ -315,8 +336,6 @@ export default function GamePage() {
                 }
               }
             }
-          } catch (e) {
-            console.error("LocalStorage okunurken hata:", e);
           }
         }
 
