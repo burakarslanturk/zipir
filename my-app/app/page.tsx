@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import CryptoJS from "crypto-js";
+import { saveScoreAction } from "./actions";
 
 // Şifre çözmek için API'dekiyle aynı anahtarı kullanmalıyız (.env'den).
 const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY as string;
@@ -784,19 +785,11 @@ export default function GamePage() {
       const dd = String(today.getUTCDate()).padStart(2, "0");
       const formattedDate = `${yyyy}-${mm}-${dd}`;
 
-      const { error } = await supabase
-        .from("leaderboard")
-        .insert([
-          {
-            nickname: nickname.trim(),
-            score: score,
-            time_left: timeLeft,
-            game_date: formattedDate
-          }
-        ]);
+      // Sunucu Tarafına Veri Gönderiliyor (Server Action)
+      const res = await saveScoreAction(nickname, score, timeLeft);
 
-      if (error) {
-        console.error("Skor kaydedilirken hata oluştu:", error);
+      if (!res?.success) {
+        alert(res?.error || "Skor kaydedilirken bir hata oluştu.");
         return;
       }
 
