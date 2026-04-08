@@ -257,7 +257,11 @@ export default function GamePage() {
         const savedRaw = localStorage.getItem("kelime_oyunu_save");
         if (savedRaw) {
           try {
-            const savedState = JSON.parse(savedRaw);
+            // Şifreyi çöz
+            const bytes = CryptoJS.AES.decrypt(savedRaw, ENCRYPTION_KEY);
+            const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
+            const savedState = JSON.parse(decryptedString);
+
             // Sadece bugünün tarihi ise yükle, değilse yoksay
             if (savedState.date === formattedDate) {
               setScore(savedState.score ?? 0);
@@ -464,7 +468,9 @@ export default function GamePage() {
       answerStartTime
     };
 
-    localStorage.setItem("kelime_oyunu_save", JSON.stringify(gameState));
+    // State'i şifreleyerek tarayıcıya (LocalStorage) kaydet
+    const encryptedGameState = CryptoJS.AES.encrypt(JSON.stringify(gameState), ENCRYPTION_KEY).toString();
+    localStorage.setItem("kelime_oyunu_save", encryptedGameState);
   }, [score, timeLeft, currentQuestionIndex, revealedLetters, isGameActive, showGameOverModal, showLeaderboard, nickname, isAnswering, answerStartTime, isLoading, questions.length, hasStarted]);
 
   // Oyun bitiş kontrolü
