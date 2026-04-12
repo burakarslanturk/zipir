@@ -887,35 +887,35 @@ export default function GamePage() {
       {showLeaderboard ? (
         <div className="w-full flex-1 flex flex-col justify-center items-center p-4">
           {/* Logo */}
-          <h1 className="text-4xl sm:text-5xl font-nunito font-black tracking-tight text-violet-600 mb-4 drop-shadow-sm">
+          <h1 className="text-3xl sm:text-4xl font-nunito font-black tracking-tight text-violet-600 mb-3 drop-shadow-sm">
             ZIPIR<span className="text-violet-400 italic">!</span>
           </h1>
 
-          <div className="w-full max-w-3xl bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 text-center">
-            <h2 className="text-2xl sm:text-3xl font-black text-violet-500 mb-6 border-b border-slate-100 pb-4">
+          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-sm border border-slate-100 p-5 sm:p-6 text-center">
+            <h2 className="text-xl sm:text-2xl font-black text-violet-500 mb-4 border-b border-slate-100 pb-3">
               Bugünün Liderlik Tablosu
             </h2>
 
             {/* Kişisel İstatistikler */}
             {userStats && (
-              <div className="mb-6 pb-6 border-b border-slate-100">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Senin İstatistiklerin</p>
+              <div className="mb-4 pb-4 border-b border-slate-100">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Senin İstatistiklerin</p>
                 <div className="grid grid-cols-4 gap-2 sm:gap-4">
-                  <div className="flex flex-col items-center bg-amber-50 rounded-xl p-3 sm:p-4 border border-amber-100">
-                    <span className="text-2xl sm:text-3xl font-black text-amber-500">{userStats.streak}</span>
-                    <span className="text-[10px] sm:text-xs font-semibold text-amber-600 mt-1 leading-tight">🔥 Seri</span>
+                  <div className="flex flex-col items-center bg-amber-50 rounded-xl p-2 sm:p-3 border border-amber-100">
+                    <span className="text-xl sm:text-2xl font-black text-amber-500">{userStats.streak}</span>
+                    <span className="text-[10px] font-semibold text-amber-600 mt-0.5 leading-tight">🔥 Seri</span>
                   </div>
-                  <div className="flex flex-col items-center bg-violet-50 rounded-xl p-3 sm:p-4 border border-violet-100">
-                    <span className="text-2xl sm:text-3xl font-black text-violet-600">{userStats.bestScore}</span>
-                    <span className="text-[10px] sm:text-xs font-semibold text-violet-500 mt-1 leading-tight">🏆 En İyi</span>
+                  <div className="flex flex-col items-center bg-violet-50 rounded-xl p-2 sm:p-3 border border-violet-100">
+                    <span className="text-xl sm:text-2xl font-black text-violet-600">{userStats.bestScore}</span>
+                    <span className="text-[10px] font-semibold text-violet-500 mt-0.5 leading-tight">🏆 En İyi</span>
                   </div>
-                  <div className="flex flex-col items-center bg-blue-50 rounded-xl p-3 sm:p-4 border border-blue-100">
-                    <span className="text-2xl sm:text-3xl font-black text-blue-500">{userStats.avgScore}</span>
-                    <span className="text-[10px] sm:text-xs font-semibold text-blue-500 mt-1 leading-tight">⌀ Ortalama</span>
+                  <div className="flex flex-col items-center bg-blue-50 rounded-xl p-2 sm:p-3 border border-blue-100">
+                    <span className="text-xl sm:text-2xl font-black text-blue-500">{userStats.avgScore}</span>
+                    <span className="text-[10px] font-semibold text-blue-500 mt-0.5 leading-tight">⌀ Ortalama</span>
                   </div>
-                  <div className="flex flex-col items-center bg-emerald-50 rounded-xl p-3 sm:p-4 border border-emerald-100">
-                    <span className="text-2xl sm:text-3xl font-black text-emerald-600">{userStats.totalGames}</span>
-                    <span className="text-[10px] sm:text-xs font-semibold text-emerald-600 mt-1 leading-tight">🎮 Toplam</span>
+                  <div className="flex flex-col items-center bg-emerald-50 rounded-xl p-2 sm:p-3 border border-emerald-100">
+                    <span className="text-xl sm:text-2xl font-black text-emerald-600">{userStats.totalGames}</span>
+                    <span className="text-[10px] font-semibold text-emerald-600 mt-0.5 leading-tight">🎮 Toplam</span>
                   </div>
                 </div>
               </div>
@@ -923,23 +923,23 @@ export default function GamePage() {
             {leaderboardData.length === 0 ? (
               <p className="text-slate-500 py-8">Henüz bir skor kaydedilmemiş.</p>
             ) : (
-              <div className="w-full max-h-64 overflow-y-auto pr-2 overflow-x-auto">
-                <table className="w-full text-left border-collapse cursor-default">
+              <div className="w-full max-h-48 sm:max-h-56 overflow-y-auto pr-2 overflow-x-auto">
+                <table className="w-full text-left border-collapse cursor-default text-sm sm:text-base">
                   <thead className="sticky top-0 z-10 bg-white">
-                    <tr className="bg-violet-50 text-violet-800">
-                      <th className="py-3 px-4 rounded-tl-lg font-semibold">#</th>
-                      <th className="py-3 px-4 font-semibold">Oyuncu</th>
-                      <th className="py-3 px-4 font-semibold text-center">Puan</th>
-                      <th className="py-3 px-4 rounded-tr-lg font-semibold text-right">Süre</th>
+                    <tr className="bg-violet-50 text-violet-800 text-xs sm:text-sm">
+                      <th className="py-2 px-3 rounded-tl-lg font-semibold">#</th>
+                      <th className="py-2 px-3 font-semibold">Oyuncu</th>
+                      <th className="py-2 px-3 font-semibold text-center">Puan</th>
+                      <th className="py-2 px-3 rounded-tr-lg font-semibold text-right">Süre</th>
                     </tr>
                   </thead>
                   <tbody>
                     {leaderboardData.map((item, idx) => (
                       <tr key={idx} className="border-b border-slate-50 last:border-none hover:bg-slate-50 transition-colors">
-                        <td className="py-3 px-4 text-slate-500 font-medium">{idx + 1}</td>
-                        <td className="py-3 px-4 font-bold text-slate-700">{item.nickname}</td>
-                        <td className="py-3 px-4 font-black text-violet-600 text-center">{item.score}</td>
-                        <td className="py-3 px-4 font-mono text-slate-500 text-right">{item.time_left} sn</td>
+                        <td className="py-2 px-3 text-slate-500 font-medium">{idx + 1}</td>
+                        <td className="py-2 px-3 font-bold text-slate-700">{item.nickname}</td>
+                        <td className="py-2 px-3 font-black text-violet-600 text-center">{item.score}</td>
+                        <td className="py-2 px-3 font-mono text-slate-500 text-right">{item.time_left} sn</td>
                       </tr>
                     ))}
                   </tbody>
@@ -947,7 +947,7 @@ export default function GamePage() {
               </div>
             )}
             
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 pt-5 border-t border-slate-100">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4 pt-4 border-t border-slate-100">
               <NextGameTimer />
               
               <div className="relative flex items-center">
@@ -1183,7 +1183,7 @@ export default function GamePage() {
           {/* OYUN ANA EKRANI (Ana Tasarım) */}
           <div className="fixed top-0 left-0 w-full z-40 pt-2 sm:pt-4 flex justify-center pointer-events-none">
             <div className="w-full max-w-4xl px-4 flex justify-center">
-              <header className={`pointer-events-auto w-full bg-white/40 backdrop-blur-md shadow-sm border border-slate-200/60 rounded-2xl px-3 py-3 sm:px-4 flex items-center justify-between gap-1 sm:gap-4 transition-all duration-300 ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
+              <header className={`pointer-events-auto w-full bg-white/95 backdrop-blur-md shadow-md border border-slate-300 rounded-2xl px-3 py-3 sm:px-4 flex items-center justify-between gap-1 sm:gap-4 transition-all duration-300 ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
                 {/* Sol: Ayarlar Butonu */}
                 <div className="flex-1 flex justify-start shrink-0">
                   <button
@@ -1207,7 +1207,7 @@ export default function GamePage() {
 
                 {/* Sağ: Puan */}
                 <div className="flex-1 flex justify-end shrink-0">
-                  <div className="flex items-center py-1.5 px-3 sm:py-2 sm:px-5 bg-white shadow-sm rounded-xl border border-slate-100">
+                  <div className="flex items-center py-1.5 px-3 sm:py-2 sm:px-5 bg-white shadow-md rounded-xl border border-slate-200">
                     <div className="text-sm sm:text-base font-semibold text-slate-600 flex items-center">
                       Puan: <span className={`text-violet-600 font-bold text-base sm:text-xl ml-1 sm:ml-1.5 transition-transform duration-300 ${isScoreAnimating ? 'scale-[1.3]' : 'scale-100'}`}>{score}</span>
                     </div>
@@ -1218,11 +1218,11 @@ export default function GamePage() {
           </div>
 
           <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pt-28 sm:pt-36 pb-20 ${isAnswering ? 'max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 flex flex-col items-center relative">
+            <div className="bg-white rounded-2xl shadow-2xl shadow-slate-300/60 border-2 border-slate-200 p-6 sm:p-10 flex flex-col items-center relative">
               
               {/* Kart İçi Üst Bilgi Satırı: Soru Sayısı ve Süre */}
               <div className="flex flex-wrap sm:flex-nowrap justify-between items-center w-full mb-6 pb-3 border-b border-slate-100 relative">
-                <div className="flex items-center gap-2 text-slate-500 font-medium">
+                <div className="flex items-center gap-2 text-slate-600 font-medium">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
                     <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                   </svg>
@@ -1284,17 +1284,17 @@ export default function GamePage() {
                     }
 
                     // Stil Katmanları
-                    let boxStyle = "bg-slate-50 border-slate-200 text-transparent"; // Boş normal kutu
+                    let boxStyle = "bg-slate-100 border-slate-300 text-transparent shadow-inner"; // Boş normal kutu
                     if (answerStatus === "correct" && isRevealed) {
-                      boxStyle = "bg-emerald-50 border-emerald-500 text-emerald-700 shadow-md transform -translate-y-1 transition-all duration-300";
+                      boxStyle = "bg-emerald-50 border-emerald-500 border-b-4 text-emerald-700 shadow-md transform -translate-y-1 transition-all duration-300";
                     } else if (answerStatus === "wrong" && !isRevealed) {
-                      boxStyle = "bg-red-50 border-red-500 text-red-700 shadow-md";
+                      boxStyle = "bg-red-50 border-red-500 text-red-800 shadow-md";
                     } else if (isRevealed) {
-                      boxStyle = "bg-violet-50 border-violet-200 text-violet-700 shadow-sm"; // Sistem İpucu Harfi
+                      boxStyle = "bg-violet-100 border-violet-300 text-violet-800 font-black shadow-sm"; // Sistem İpucu Harfi
                     } else if (isUserTyped) {
-                      boxStyle = "bg-white border-violet-500 text-violet-700 shadow-md transform -translate-y-1"; // Kullanıcı Girdisi
+                      boxStyle = "bg-white border-violet-600 border-b-4 text-violet-900 font-black shadow-md transform -translate-y-1"; // Kullanıcı Girdisi
                     } else if (isAnswering && isActiveBox) {
-                      boxStyle = "bg-violet-50/50 border-violet-400 shadow-inner ring-4 ring-violet-200/50"; // Odaklanılan
+                      boxStyle = "bg-violet-50/80 border-violet-500 shadow-inner ring-4 ring-violet-300/50"; // Odaklanılan
                     }
 
                     const isManyLetters = currentQuestion.word.length > 8;
