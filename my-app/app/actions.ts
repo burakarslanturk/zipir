@@ -3,6 +3,8 @@
 import { supabase } from "../lib/supabase";
 
 export async function saveScoreAction(nickname: string, score: number, timeLeft: number, userId: string) {
+  // 1. Matematiksel Doğrulamalar (Validation)
+  // Kurallar: Maksimum puan 9800, Maksimum kalan süre 240
   if (score > 9800) {
     return { success: false, error: "Geçersiz skor. Maksimum alınabilecek puan 9800'dür." };
   }
@@ -11,6 +13,7 @@ export async function saveScoreAction(nickname: string, score: number, timeLeft:
     return { success: false, error: "Geçersiz süre. Kalan süre 240 saniyeden fazla olamaz." };
   }
 
+  // 2. Kullanıcı Adı Filtresi
   if (!nickname || nickname.trim().length === 0) {
     return { success: false, error: "Lütfen geçerli bir kullanıcı adı girin." };
   }
@@ -19,9 +22,11 @@ export async function saveScoreAction(nickname: string, score: number, timeLeft:
     return { success: false, error: "Geçersiz kullanıcı kimliği." };
   }
 
+  // Kötü niyetli uzun metinleri kırparak engelliyoruz (max 25 karakter)
   const safeNickname = nickname.trim().substring(0, 25);
 
   try {
+    // Bugünün tarihini UTC olarak hesaplıyoruz
     const today = new Date();
     const yyyy = today.getUTCFullYear();
     const mm = String(today.getUTCMonth() + 1).padStart(2, "0");
@@ -40,6 +45,7 @@ export async function saveScoreAction(nickname: string, score: number, timeLeft:
       return { success: false, error: "Bugünkü skorunu zaten kaydettin!" };
     }
 
+    // Veritabanına Kayıt İşlemi
     const { error } = await supabase
       .from("leaderboard")
       .insert([
