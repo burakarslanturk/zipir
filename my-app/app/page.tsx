@@ -3,7 +3,17 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import CryptoJS from "crypto-js";
-import { saveScoreAction } from "./actions";
+import { saveScoreAction, getUserStatsAction } from "./actions";
+
+function getOrCreateUserId(): string {
+  const KEY = "zipir_user_id";
+  let id = localStorage.getItem(KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(KEY, id);
+  }
+  return id;
+}
 
 // Şifre çözmek için API'dekiyle aynı anahtarı kullanmalıyız (.env'den).
 const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY as string;
@@ -185,6 +195,14 @@ export default function GamePage() {
   const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
   const [showToast, setShowToast] = useState(false); // Kopyalandı bildirimi için (genel)
   const [isCopied, setIsCopied] = useState(false); // Sadece leaderboard'daki buton için lokal toolitp
+
+  // Kullanıcı istatistikleri
+  const [userStats, setUserStats] = useState<{
+    totalGames: number;
+    bestScore: number;
+    avgScore: number;
+    streak: number;
+  } | null>(null);
 
   const fetchLeaderboard = async (dateStr: string) => {
     try {
@@ -810,13 +828,17 @@ export default function GamePage() {
       const dd = String(today.getUTCDate()).padStart(2, "0");
       const formattedDate = `${yyyy}-${mm}-${dd}`;
 
-      // Sunucu Tarafına Veri Gönderiliyor (Server Action)
-      const res = await saveScoreAction(nickname, score, timeLeft);
+      const userId = getOrCreateUserId();
+      const res = await saveScoreAction(nickname, score, timeLeft, userId);
 
       if (!res?.success) {
         alert(res?.error || "Skor kaydedilirken bir hata oluştu.");
         return;
       }
+
+      // İstatistikleri çek ve göster
+      const stats = await getUserStatsAction(userId);
+      setUserStats(stats);
 
       setShowGameOverModal(false);
       await fetchLeaderboard(formattedDate);
@@ -861,6 +883,31 @@ export default function GamePage() {
             <h2 className="text-2xl sm:text-3xl font-black text-violet-500 mb-6 border-b border-slate-100 pb-4">
               Bugünün Liderlik Tablosu
             </h2>
+
+            {/* Kişisel İstatistikler */}
+            {userStats && (
+              <div className="mb-6 pb-6 border-b border-slate-100">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Senin İstatistiklerin</p>
+                <div className="grid grid-cols-4 gap-2 sm:gap-4">
+                  <div className="flex flex-col items-center bg-amber-50 rounded-xl p-3 sm:p-4 border border-amber-100">
+                    <span className="text-2xl sm:text-3xl font-black text-amber-500">{userStats.streak}</span>
+                    <span className="text-[10px] sm:text-xs font-semibold text-amber-600 mt-1 leading-tight">🔥 Seri</span>
+                  </div>
+                  <div className="flex flex-col items-center bg-violet-50 rounded-xl p-3 sm:p-4 border border-violet-100">
+                    <span className="text-2xl sm:text-3xl font-black text-violet-600">{userStats.bestScore}</span>
+                    <span className="text-[10px] sm:text-xs font-semibold text-violet-500 mt-1 leading-tight">🏆 En İyi</span>
+                  </div>
+                  <div className="flex flex-col items-center bg-blue-50 rounded-xl p-3 sm:p-4 border border-blue-100">
+                    <span className="text-2xl sm:text-3xl font-black text-blue-500">{userStats.avgScore}</span>
+                    <span className="text-[10px] sm:text-xs font-semibold text-blue-500 mt-1 leading-tight">⌀ Ortalama</span>
+                  </div>
+                  <div className="flex flex-col items-center bg-emerald-50 rounded-xl p-3 sm:p-4 border border-emerald-100">
+                    <span className="text-2xl sm:text-3xl font-black text-emerald-600">{userStats.totalGames}</span>
+                    <span className="text-[10px] sm:text-xs font-semibold text-emerald-600 mt-1 leading-tight">🎮 Toplam</span>
+                  </div>
+                </div>
+              </div>
+            )}
             {leaderboardData.length === 0 ? (
               <p className="text-slate-500 py-8">Henüz bir skor kaydedilmemiş.</p>
             ) : (
