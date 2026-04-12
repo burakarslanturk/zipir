@@ -315,6 +315,13 @@ export default function GamePage() {
                 setShowLeaderboard(true);
                 setHasStarted(true); // Direkt liderlik tablosu başlasın
                 fetchLeaderboard(formattedDate);
+                // Sayfa yenilenince istatistikler kaybolmasın diye tekrar çek
+                const userId = localStorage.getItem("zipir_user_id");
+                if (userId) {
+                  getUserStatsAction(userId).then((stats) => {
+                    if (stats) setUserStats(stats);
+                  });
+                }
               } 
               // Eğer oynanırken yarım kalmışsa ve oyun bitmişse modal göster
               else if (savedState.showGameOverModal) {
@@ -879,6 +886,11 @@ export default function GamePage() {
       {/* Liderlik Tablosu Görünümü */}
       {showLeaderboard ? (
         <div className="w-full flex-1 flex flex-col justify-center items-center p-4">
+          {/* Logo */}
+          <h1 className="text-4xl sm:text-5xl font-nunito font-black tracking-tight text-violet-600 mb-4 drop-shadow-sm">
+            ZIPIR<span className="text-violet-400 italic">!</span>
+          </h1>
+
           <div className="w-full max-w-3xl bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 text-center">
             <h2 className="text-2xl sm:text-3xl font-black text-violet-500 mb-6 border-b border-slate-100 pb-4">
               Bugünün Liderlik Tablosu
