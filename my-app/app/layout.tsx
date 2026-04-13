@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Nunito, Outfit } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css";
 
 const nunito = Nunito({
@@ -27,7 +28,10 @@ export default function RootLayout({
       lang="tr"
       className={`${nunito.variable} ${outfit.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
