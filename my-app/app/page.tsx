@@ -862,7 +862,7 @@ export default function GamePage() {
     const formattedDate = `${today.getDate().toString().padStart(2, "0")}.${(today.getMonth() + 1).toString().padStart(2, "0")}.${today.getFullYear()}`;
     const playUrl = window.location.origin;
 
-    const shareText = `🟩 Günlük Kelime Oyunu\n📅 ${formattedDate}\n🎯 Puan: ${score}\n⏱️ Artan Süre: ${timeLeft} sn\n🔗 Oynamak için: ${playUrl}`;
+    const shareText = `ZIPIR! - Kelime oyunu\n\n${formattedDate}\nPuan: ${score}\nArtanSüre: ${timeLeft} sn\n\n${playUrl}`;
 
     try {
       await navigator.clipboard.writeText(shareText);
@@ -1189,7 +1189,7 @@ export default function GamePage() {
                   <button
                     onClick={() => setShowSettingsModal(true)}
                     aria-label="Ayarlar"
-                    className="p-1.5 sm:p-2 bg-white rounded-xl shadow-sm border border-violet-100 text-violet-600 active:scale-95 transition-all"
+                    className="p-1.5 sm:p-2 bg-white rounded-xl shadow-md border border-slate-200 text-violet-600 active:scale-95 transition-all"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
@@ -1232,12 +1232,17 @@ export default function GamePage() {
                 {/* 30 Saniyelik Cevaplama Süresi - Soru ve Ana Süre Arasında */}
                 {isAnswering && (
                   <div className="w-full flex justify-center order-last mt-4 sm:w-auto sm:order-none sm:mt-0 sm:absolute sm:left-1/2 sm:-translate-x-1/2 bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-full font-bold text-sm items-center gap-1.5 shadow-sm animate-pulse whitespace-nowrap">
-                    <span>⏱️</span> Kalan Cevap Süresi: {answerTimeLeft} sn
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
+                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span>Cevap Süresi: {answerTimeLeft} sn</span>
                   </div>
                 )}
                 
                 <div className={`flex items-center gap-2 font-mono text-lg sm:text-xl ${timeLeft <= 30 ? "text-red-500 font-bold animate-pulse scale-105 transition-transform" : "text-slate-700 font-bold"}`}>
-                  <span className="text-xl sm:text-2xl">⏱️</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${timeLeft <= 30 ? "text-red-500" : "text-slate-400"}`}>
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
                   <span className="w-14 text-right">{formatTime(timeLeft)}</span>
                 </div>
               </div>
