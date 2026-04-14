@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     url: "https://zipir.app",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "ZIPIR! Kelime Oyunu",
