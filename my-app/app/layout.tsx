@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "ZIPIR! | Kelime Oyunu",
     description: "Bugün hiç harf almadan tamamlayabilecek misin? Hadi arkadaşlarına meydan oku!",
-    images: ["/og-image.png"],
+    images: ["/og-image.jpg"],
   },
 };
 
