@@ -198,10 +198,10 @@ export default function GamePageDemo() {
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
       <div className="fixed top-0 left-0 w-full z-40 pt-2 sm:pt-4 flex justify-center pointer-events-none">
         <div className="w-full max-w-4xl px-4 flex justify-center">
-          <header className={`pointer-events-auto w-full bg-white/40 backdrop-blur-md shadow-sm border border-slate-200/60 rounded-2xl px-3 py-3 sm:px-4 flex items-center justify-between gap-1 sm:gap-4 transition-all duration-300 ${(showGameOverModal || showToast) ? 'blur-sm' : ''}`}>
+          <header className={`pointer-events-auto w-full bg-white/95 backdrop-blur-md shadow-md border border-slate-300 rounded-2xl px-3 py-3 sm:px-4 flex items-center justify-between gap-1 sm:gap-4 transition-all duration-300 ${(showGameOverModal || showToast) ? 'blur-sm' : ''}`}>
             {/* Sol: Demo Tag */}
             <div className="flex-1 flex justify-start shrink-0">
-              <span className="text-xs sm:text-sm font-bold text-slate-400 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">DEMO</span>
+              <span className="text-xs sm:text-sm font-bold text-slate-500 bg-white shadow-md border border-slate-200 px-3 py-1.5 rounded-xl">DEMO</span>
             </div>
 
             {/* Orta: Logo */}
@@ -213,7 +213,7 @@ export default function GamePageDemo() {
 
             {/* Sağ: Puan */}
             <div className="flex-1 flex justify-end shrink-0">
-              <div className="flex items-center py-1.5 px-3 sm:py-2 sm:px-5 bg-white shadow-sm rounded-xl border border-slate-100">
+              <div className="flex items-center py-1.5 px-3 sm:py-2 sm:px-5 bg-white shadow-md rounded-xl border border-slate-200">
                 <div className="text-sm sm:text-base font-semibold text-slate-600 flex items-center">
                   Puan: <span className="text-orange-500 font-bold text-base sm:text-xl ml-1 sm:ml-1.5 transition-transform duration-300">{score}</span>
                 </div>
@@ -226,7 +226,7 @@ export default function GamePageDemo() {
       <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pb-20 pt-28 sm:pt-36 ${isAnswering ? 'max-sm:pb-64' : ''}`}>
         
         {/* ANA KART */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-10 flex flex-col items-center relative">
+        <div className="bg-white rounded-2xl shadow-2xl shadow-slate-300/60 border-2 border-slate-200 p-6 sm:p-10 flex flex-col items-center relative">
           
           {/* Kart İçi Üst Bilgi Satırı: Soru Sayısı ve Süre */}
           <div className="flex flex-wrap sm:flex-nowrap justify-between items-center w-full mb-6 pb-3 border-b border-slate-100 relative">

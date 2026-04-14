@@ -1183,15 +1183,15 @@ export default function GamePage() {
           {/* OYUN ANA EKRANI (Ana Tasarım) */}
           <div className="fixed top-0 left-0 w-full z-40 pt-2 sm:pt-4 flex justify-center pointer-events-none">
             <div className="w-full max-w-4xl px-4 flex justify-center">
-              <header className={`pointer-events-auto w-full bg-white/95 backdrop-blur-md shadow-md border border-slate-300 rounded-2xl px-3 py-3 sm:px-4 flex items-center justify-between gap-1 sm:gap-4 transition-all duration-300 ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
+              <header className={`pointer-events-auto w-full bg-white/90 backdrop-blur-md shadow-md shadow-slate-200/50 border border-slate-200 rounded-2xl px-2 py-2 sm:px-3 flex items-center justify-between gap-1 sm:gap-4 transition-all duration-300 ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
                 {/* Sol: Ayarlar Butonu */}
                 <div className="flex-1 flex justify-start shrink-0">
                   <button
                     onClick={() => setShowSettingsModal(true)}
                     aria-label="Ayarlar"
-                    className="p-1.5 sm:p-2 bg-white rounded-xl shadow-md border border-slate-200 text-violet-600 active:scale-95 transition-all"
+                    className="p-2 rounded-xl text-slate-400 hover:text-violet-600 hover:bg-violet-50 active:scale-95 transition-all"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
                       <circle cx="12" cy="12" r="3"/>
                     </svg>
@@ -1200,16 +1200,16 @@ export default function GamePage() {
 
                 {/* Orta: Logo */}
                 <div className="flex justify-center shrink-1 px-1 sm:px-2">
-                  <h1 className="text-3xl sm:text-5xl font-nunito font-black tracking-tight text-violet-600 transition-transform origin-center">
+                  <h1 className="text-3xl sm:text-4xl font-nunito font-black tracking-tight text-violet-600 transition-transform origin-center">
                     ZIPIR<span className="text-violet-400 italic">!</span>
                   </h1>
                 </div>
 
                 {/* Sağ: Puan */}
                 <div className="flex-1 flex justify-end shrink-0">
-                  <div className="flex items-center py-1.5 px-3 sm:py-2 sm:px-5 bg-white shadow-md rounded-xl border border-slate-200">
+                  <div className="flex items-center py-1.5 px-3 sm:py-2 sm:px-4 bg-violet-100/60 border border-violet-100 rounded-xl">
                     <div className="text-sm sm:text-base font-semibold text-slate-600 flex items-center">
-                      Puan: <span className={`text-violet-600 font-bold text-base sm:text-xl ml-1 sm:ml-1.5 transition-transform duration-300 ${isScoreAnimating ? 'scale-[1.3]' : 'scale-100'}`}>{score}</span>
+                      Puan: <span className={`text-violet-700 font-bold text-base sm:text-xl ml-1 sm:ml-1.5 transition-transform duration-300 ${isScoreAnimating ? 'scale-[1.3]' : 'scale-100'}`}>{score}</span>
                     </div>
                   </div>
                 </div>
@@ -1218,7 +1218,7 @@ export default function GamePage() {
           </div>
 
           <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pt-28 sm:pt-36 pb-20 ${isAnswering ? 'max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
-            <div className="bg-white rounded-2xl shadow-2xl shadow-slate-300/60 border-2 border-slate-200 p-6 sm:p-10 flex flex-col items-center relative">
+            <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 p-6 sm:p-10 flex flex-col items-center relative">
               
               {/* Kart İçi Üst Bilgi Satırı: Soru Sayısı ve Süre */}
               <div className="flex flex-wrap sm:flex-nowrap justify-between items-center w-full mb-6 pb-3 border-b border-slate-100 relative">
@@ -1231,11 +1231,11 @@ export default function GamePage() {
                 
                 {/* 30 Saniyelik Cevaplama Süresi - Soru ve Ana Süre Arasında */}
                 {isAnswering && (
-                  <div className="w-full flex justify-center order-last mt-4 sm:w-auto sm:order-none sm:mt-0 sm:absolute sm:left-1/2 sm:-translate-x-1/2 bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-full font-bold text-sm items-center gap-1.5 shadow-sm animate-pulse whitespace-nowrap">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
+                  <div className="w-full flex justify-center order-last mt-4 sm:w-auto sm:order-none sm:mt-0 sm:absolute sm:left-1/2 sm:-translate-x-1/2 bg-red-50 text-red-600 border border-red-200 px-3 py-1 rounded-full font-bold text-sm items-center gap-1.5 shadow-sm animate-pulse whitespace-nowrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
                       <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                     </svg>
-                    <span>Cevap Süresi: {answerTimeLeft} sn</span>
+                    <span>{answerTimeLeft} sn</span>
                   </div>
                 )}
                 
@@ -1248,8 +1248,8 @@ export default function GamePage() {
               </div>
               
               {/* Soru Değeri Etiketi */}
-              <div className="absolute -top-4 bg-gradient-to-r from-violet-500 to-violet-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm uppercase tracking-wide">
-                Bu sorunun değeri: {currentPotentialScore} Puan
+              <div className="absolute -top-4 bg-violet-100 text-violet-700 border border-violet-200 text-xs font-bold px-4 py-1.5 rounded-full shadow-sm tracking-wide">
+                Bu Sorunun Değeri: {currentPotentialScore} Puan
               </div>
 
               {/* Soru / İpucu Metni */}
