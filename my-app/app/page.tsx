@@ -604,7 +604,7 @@ export default function GamePage() {
             ZIPIR<span className="text-violet-400 italic">!</span>
           </h1>
           <p className="mt-1.5 text-base sm:text-lg text-slate-500 font-light tracking-wide">
-            Günlük Kelime Bulmaca Oyunu
+            Günlük Kelime Oyunu
           </p>
         </div>
 
@@ -862,7 +862,7 @@ export default function GamePage() {
     const formattedDate = `${today.getDate().toString().padStart(2, "0")}.${(today.getMonth() + 1).toString().padStart(2, "0")}.${today.getFullYear()}`;
     const playUrl = window.location.origin;
 
-    const shareText = `ZIPIR! - Kelime oyunu\n\n${formattedDate}\nPuan: ${score}\nArtanSüre: ${timeLeft} sn\n\n${playUrl}`;
+    const shareText = `ZIPIR! - Kelime oyunu\n\n${formattedDate}\nPuan: ${score}\nArtan Süre: ${timeLeft} sn\n\n${playUrl}`;
 
     try {
       await navigator.clipboard.writeText(shareText);
