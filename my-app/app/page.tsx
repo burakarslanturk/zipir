@@ -5,6 +5,13 @@ import { supabase } from "../lib/supabase";
 import CryptoJS from "crypto-js";
 import { saveScoreAction, getUserStatsAction } from "./actions";
 
+function playSound(src: string, enabled: boolean) {
+  if (!enabled) return;
+  const audio = new Audio(src);
+  audio.volume = 0.6;
+  audio.play().catch(() => {});
+}
+
 function getOrCreateUserId(): string {
   const KEY = "zipir_user_id";
   let id = localStorage.getItem(KEY);
@@ -442,6 +449,7 @@ export default function GamePage() {
     setScore((prev) => prev - penalty);
     setAnswerStatus("wrong");
     setIsShaking(true);
+    if (isTimeout) playSound('/sounds/wrong.mp3', isSoundEnabled);
 
     // Aşama 2: 1.5 saniye yanlış girdiyi/süreyi gösterdikten sonra doğru cevabı göster
     setTimeout(() => {
@@ -468,6 +476,7 @@ export default function GamePage() {
     setIsTransitioning(true);
     setScore((prev) => prev + reward);
     setAnswerStatus("correct");
+    playSound('/sounds/correct.mp3', isSoundEnabled);
     
     setRevealedLetters((prevRevealed) => Array.from({ length: currentQuestionWord.length }, (_, i) => i));
 
@@ -751,7 +760,6 @@ export default function GamePage() {
                         <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${isSoundEnabled ? "translate-x-6" : "translate-x-0"}`} />
                       </button>
                     </div>
-                    <p className="text-xs text-slate-400 text-center">Ses efektleri yakında eklenecek.</p>
                   </div>
                 )}
                 {settingsTab === "tema" && (
@@ -913,6 +921,7 @@ export default function GamePage() {
     if (unrevealedIndices.length > 0) {
       const randomIndex = unrevealedIndices[Math.floor(Math.random() * unrevealedIndices.length)];
       setRevealedLetters((prev) => [...prev, randomIndex]);
+      playSound('/sounds/harfal.mp3', isSoundEnabled);
     }
   };
 
@@ -1284,7 +1293,6 @@ export default function GamePage() {
                           <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${isSoundEnabled ? "translate-x-6" : "translate-x-0"}`} />
                         </button>
                       </div>
-                      <p className="text-xs text-slate-400 text-center">Ses efektleri yakında eklenecek.</p>
                     </div>
                   )}
 
