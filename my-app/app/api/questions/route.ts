@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import CryptoJS from 'crypto-js';
 
-// Şifreleme anahtarını artık sadece .env dosyasından alıyoruz.
+export const dynamic = 'force-dynamic';
+
 const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY as string;
 
 export async function GET() {
@@ -34,7 +35,9 @@ export async function GET() {
       word: CryptoJS.AES.encrypt(question.word, ENCRYPTION_KEY).toString()
     }));
 
-    return NextResponse.json({ questions: encryptedData });
+    return NextResponse.json({ questions: encryptedData }, {
+      headers: { 'Cache-Control': 'no-store' },
+    });
   } catch (err) {
     console.error('API Çalışma Hatası:', err);
     return NextResponse.json({ error: 'Bir sorun oluştu' }, { status: 500 });

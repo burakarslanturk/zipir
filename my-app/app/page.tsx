@@ -176,6 +176,49 @@ export default function GamePage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // bfcache'den geri yükleme veya sekme ertesi gün açılırsa sayfayı yenile
+  useEffect(() => {
+    const getUTCDateStr = () => {
+      const d = new Date();
+      return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+    };
+
+    // Opera/Chrome sekme geri yüklemesi: sayfa reload edilmeden bellekten geliyorsa yenile
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        window.location.reload();
+      }
+    };
+
+    // Sekme tekrar aktif olduğunda tarih değiştiyse yenile
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        const savedRaw = localStorage.getItem("kelime_oyunu_save");
+        if (savedRaw) {
+          try {
+            const bytes = CryptoJS.AES.decrypt(savedRaw, ENCRYPTION_KEY);
+            const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
+            if (decryptedString) {
+              const savedState = JSON.parse(decryptedString);
+              if (savedState.date && savedState.date !== getUTCDateStr()) {
+                window.location.reload();
+              }
+            }
+          } catch {
+            // Şifre çözülemezse yoksay
+          }
+        }
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
   useEffect(() => {
     if (score > 0 || (score === 0 && questions.length > 0)) {
       setIsScoreAnimating(true);
