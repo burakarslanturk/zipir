@@ -8,10 +8,11 @@ const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY as string;
 
 export async function GET() {
   try {
-    const today = new Date();
-    const yyyy = today.getUTCFullYear();
-    const mm = String(today.getUTCMonth() + 1).padStart(2, "0");
-    const dd = String(today.getUTCDate()).padStart(2, "0");
+    const now = new Date();
+    const turkeyTime = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+    const yyyy = turkeyTime.getUTCFullYear();
+    const mm = String(turkeyTime.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(turkeyTime.getUTCDate()).padStart(2, "0");
     const formattedDate = `${yyyy}-${mm}-${dd}`;
 
     const { data, error } = await supabase

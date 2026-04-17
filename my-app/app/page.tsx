@@ -31,7 +31,11 @@ function NextGameTimer() {
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date();
-      const nextMidnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+      const turkeyNow = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+      const nextMidnight = new Date(
+        Date.UTC(turkeyNow.getUTCFullYear(), turkeyNow.getUTCMonth(), turkeyNow.getUTCDate() + 1, 0, 0, 0)
+        - 3 * 60 * 60 * 1000
+      );
       const diffMs = nextMidnight.getTime() - now.getTime();
 
       if (diffMs <= 0) {
@@ -178,9 +182,10 @@ export default function GamePage() {
 
   // bfcache'den geri yükleme veya sekme ertesi gün açılırsa sayfayı yenile
   useEffect(() => {
-    const getUTCDateStr = () => {
+    const getTurkeyDateStr = () => {
       const d = new Date();
-      return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+      const t = new Date(d.getTime() + 3 * 60 * 60 * 1000);
+      return `${t.getUTCFullYear()}-${String(t.getUTCMonth() + 1).padStart(2, "0")}-${String(t.getUTCDate()).padStart(2, "0")}`;
     };
 
     // Opera/Chrome sekme geri yüklemesi: sayfa reload edilmeden bellekten geliyorsa yenile
@@ -200,7 +205,7 @@ export default function GamePage() {
             const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
             if (decryptedString) {
               const savedState = JSON.parse(decryptedString);
-              if (savedState.date && savedState.date !== getUTCDateStr()) {
+              if (savedState.date && savedState.date !== getTurkeyDateStr()) {
                 window.location.reload();
               }
             }
@@ -288,11 +293,11 @@ export default function GamePage() {
     const fetchTodayQuestions = async () => {
       try {
         setIsLoading(true);
-        // Bugünün tarihini YYYY-MM-DD olarak alma (UTC - Tüm dünyada aynı anda güncellenir)
-        const today = new Date();
-        const yyyy = today.getUTCFullYear();
-        const mm = String(today.getUTCMonth() + 1).padStart(2, "0");
-        const dd = String(today.getUTCDate()).padStart(2, "0");
+        const now = new Date();
+        const turkeyTime = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+        const yyyy = turkeyTime.getUTCFullYear();
+        const mm = String(turkeyTime.getUTCMonth() + 1).padStart(2, "0");
+        const dd = String(turkeyTime.getUTCDate()).padStart(2, "0");
         const formattedDate = `${yyyy}-${mm}-${dd}`;
 
         const response = await fetch('/api/questions', { cache: 'no-store' });
@@ -567,10 +572,11 @@ export default function GamePage() {
   useEffect(() => {
     if (isLoading || questions.length === 0 || !hasStarted) return;
 
-    const today = new Date();
-    const yyyy = today.getUTCFullYear();
-    const mm = String(today.getUTCMonth() + 1).padStart(2, "0");
-    const dd = String(today.getUTCDate()).padStart(2, "0");
+    const now = new Date();
+    const turkeyTime = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+    const yyyy = turkeyTime.getUTCFullYear();
+    const mm = String(turkeyTime.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(turkeyTime.getUTCDate()).padStart(2, "0");
     const formattedDate = `${yyyy}-${mm}-${dd}`;
 
     const gameState = {
@@ -1064,10 +1070,11 @@ export default function GamePage() {
 
     setIsSavingScore(true);
     try {
-      const today = new Date();
-      const yyyy = today.getUTCFullYear();
-      const mm = String(today.getUTCMonth() + 1).padStart(2, "0");
-      const dd = String(today.getUTCDate()).padStart(2, "0");
+      const now = new Date();
+      const turkeyTime = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+      const yyyy = turkeyTime.getUTCFullYear();
+      const mm = String(turkeyTime.getUTCMonth() + 1).padStart(2, "0");
+      const dd = String(turkeyTime.getUTCDate()).padStart(2, "0");
       const formattedDate = `${yyyy}-${mm}-${dd}`;
 
       const userId = getOrCreateUserId();

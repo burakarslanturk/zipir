@@ -26,11 +26,11 @@ export async function saveScoreAction(nickname: string, score: number, timeLeft:
   const safeNickname = nickname.trim().substring(0, 25);
 
   try {
-    // Bugünün tarihini UTC olarak hesaplıyoruz
-    const today = new Date();
-    const yyyy = today.getUTCFullYear();
-    const mm = String(today.getUTCMonth() + 1).padStart(2, "0");
-    const dd = String(today.getUTCDate()).padStart(2, "0");
+    const now = new Date();
+    const turkeyTime = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+    const yyyy = turkeyTime.getUTCFullYear();
+    const mm = String(turkeyTime.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(turkeyTime.getUTCDate()).padStart(2, "0");
     const formattedDate = `${yyyy}-${mm}-${dd}`;
 
     // Aynı kullanıcı bugün zaten kaydetmiş mi?
@@ -93,9 +93,10 @@ export async function getUserStatsAction(userId: string) {
     // Streak hesaplama: bugünden geriye ardışık gün sayısı
     const playedDates = new Set(data.map((r) => r.game_date));
 
-    const today = new Date();
+    const now = new Date();
+    const turkeyToday = new Date(now.getTime() + 3 * 60 * 60 * 1000);
     let streak = 0;
-    let cursor = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+    let cursor = new Date(Date.UTC(turkeyToday.getUTCFullYear(), turkeyToday.getUTCMonth(), turkeyToday.getUTCDate()));
 
     while (true) {
       const dateStr = cursor.toISOString().split("T")[0];
