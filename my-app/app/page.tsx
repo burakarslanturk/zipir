@@ -163,6 +163,9 @@ export default function GamePage() {
   // Sayfa kapalıyken cevap süresi dolduysa yükleme sonrası gecikmeyle işlem tetiklemek için
   const pendingTimeoutExpiredRef = useRef(false);
 
+  // Süresonu sesini durdurmak için referans
+  const suresonuAudioRef = useRef<HTMLAudioElement | null>(null);
+
   // Puan değiştiğinde animasyon tetiklemek için etki
   const [isMobile, setIsMobile] = useState(false);
 
@@ -407,6 +410,13 @@ export default function GamePage() {
     let timer: NodeJS.Timeout;
 
     if (isAnswering && answerTimeLeft > 0) {
+      // Son 6 saniyede süresonu sesini başlat (bir kez)
+      if (answerTimeLeft === 6 && isSoundEnabled) {
+        const audio = new Audio('/sounds/suresonu.mp3');
+        audio.volume = 0.6;
+        audio.play().catch(() => {});
+        suresonuAudioRef.current = audio;
+      }
       timer = setInterval(() => {
         setAnswerTimeLeft((prev) => prev - 1);
       }, 1000);
@@ -449,7 +459,13 @@ export default function GamePage() {
     setScore((prev) => prev - penalty);
     setAnswerStatus("wrong");
     setIsShaking(true);
-    if (isTimeout) playSound('/sounds/wrong.mp3', isSoundEnabled);
+    if (isTimeout) {
+      if (suresonuAudioRef.current) {
+        suresonuAudioRef.current.pause();
+        suresonuAudioRef.current = null;
+      }
+      playSound('/sounds/wrong.mp3', isSoundEnabled);
+    }
 
     // Aşama 2: 1.5 saniye yanlış girdiyi/süreyi gösterdikten sonra doğru cevabı göster
     setTimeout(() => {
@@ -476,6 +492,10 @@ export default function GamePage() {
     setIsTransitioning(true);
     setScore((prev) => prev + reward);
     setAnswerStatus("correct");
+    if (suresonuAudioRef.current) {
+      suresonuAudioRef.current.pause();
+      suresonuAudioRef.current = null;
+    }
     playSound('/sounds/correct.mp3', isSoundEnabled);
     
     setRevealedLetters((prevRevealed) => Array.from({ length: currentQuestionWord.length }, (_, i) => i));
