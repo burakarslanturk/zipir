@@ -1,3 +1,6 @@
+/**
+ * "Nasıl Oynanır?" modalındaki tek bir kural maddesi için props.
+ */
 interface RuleItemProps {
   iconBg: string;
   iconColor: string;
@@ -5,6 +8,9 @@ interface RuleItemProps {
   children: React.ReactNode;
 }
 
+/**
+ * Tek bir kural maddesi bileşeni. İkon ve açıklama metni içerir.
+ */
 function RuleItem({ iconBg, iconColor, icon, children }: RuleItemProps) {
   return (
     <li className="flex items-start gap-3">
@@ -16,6 +22,11 @@ function RuleItem({ iconBg, iconColor, icon, children }: RuleItemProps) {
   );
 }
 
+/**
+ * Oyun kurallarının gösterildiği içerik bileşeni.
+ * Ayarlar modalı ve giriş ekranındaki "Nasıl Oynanır?" modalında kullanılır.
+ * Kod tekrarını önlemek için tek bir kaynak olarak oluşturulmuştur.
+ */
 export function HowToPlayContent() {
   return (
     <ul className="space-y-4">

@@ -4,14 +4,27 @@ import { useState } from "react";
 import { SettingsTab } from "../../types";
 import { HowToPlayContent } from "./HowToPlayContent";
 
+/**
+ * Ayarlar modalı bileşeni için props.
+ */
 interface SettingsModalProps {
+  /** Modal açık mı? */
   isOpen: boolean;
+  /** Modal kapatıldığında çağrılır */
   onClose: () => void;
+  /** Başlangıçta aktif sekme (varsayılan: "nasil") */
   initialTab?: SettingsTab;
+  /** Ses efektleri açık mı? */
   isSoundEnabled: boolean;
+  /** Ses toggle değiştiğinde çağrılır */
   onSoundToggle: () => void;
 }
 
+/**
+ * Oyun ayarlarının gösterildiği modal bileşeni.
+ * 3 sekme içerir: Nasıl Oynanır?, Ses, Tema.
+ * Giriş ekranı ve oyun ekranında ortak olarak kullanılır.
+ */
 export function SettingsModal({ 
   isOpen, 
   onClose, 
@@ -19,8 +32,10 @@ export function SettingsModal({
   isSoundEnabled, 
   onSoundToggle 
 }: SettingsModalProps) {
+  // Aktif sekme state'i
   const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
 
+  // Modal kapalıysa render etme
   if (!isOpen) return null;
 
   return (

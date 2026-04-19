@@ -3,14 +3,27 @@
 import { LeaderboardRow, UserStats } from "../../types";
 import { NextGameTimer } from "./NextGameTimer";
 
+/**
+ * Liderlik tablosu görünümü bileşeni için props.
+ */
 interface LeaderboardViewProps {
+  /** Liderlik tablosu verisi */
   data: LeaderboardRow[];
+  /** Kullanıcının istatistikleri (null ise gösterilmez) */
   userStats: UserStats | null;
+  /** Mevcut kullanıcının rumuzu (kendi sırasını vurgulamak için) */
   nickname: string;
+  /** Paylaş butonuna tıklandığında çağrılır */
   onShare: () => void;
+  /** Sonuç panoya kopyalandı mı? (tooltip için) */
   isCopied: boolean;
 }
 
+/**
+ * Skor kaydedildikten sonra gösterilen liderlik tablosu ekranı.
+ * Bugünün en iyi skorlarını, kullanıcının istatistiklerini ve
+ * bir sonraki oyuna kalan süreyi gösterir.
+ */
 export function LeaderboardView({ data, userStats, nickname, onShare, isCopied }: LeaderboardViewProps) {
   return (
     <div className="w-full flex-1 flex flex-col justify-center items-center p-4">

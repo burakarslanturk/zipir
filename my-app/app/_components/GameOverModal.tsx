@@ -2,17 +2,32 @@
 
 import { formatTime } from "../../lib/utils";
 
+/**
+ * Oyun bitti modalı bileşeni için props.
+ */
 interface GameOverModalProps {
+  /** Oyuncunun toplam puanı */
   score: number;
+  /** Kalan süre (saniye) */
   timeLeft: number;
+  /** Oyuncunun rumuzu/nick'i */
   nickname: string;
+  /** Rumuz değiştiğinde çağrılır */
   onNicknameChange: (value: string) => void;
+  /** Skor kaydet formu gönderildiğinde çağrılır */
   onSave: (e: React.FormEvent) => void;
+  /** Paylaş butonuna tıklandığında çağrılır */
   onShare: () => void;
+  /** Skor kaydediliyor mu? (loading state) */
   isSaving: boolean;
+  /** Sonuç panoya kopyalandı mı? (tooltip için) */
   isCopied: boolean;
 }
 
+/**
+ * Oyun bittiğinde gösterilen modal.
+ * Skor özeti, paylaş butonu ve liderlik tablosuna kayıt formu içerir.
+ */
 export function GameOverModal({
   score,
   timeLeft,

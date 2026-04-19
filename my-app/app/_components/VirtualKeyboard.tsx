@@ -1,12 +1,24 @@
 "use client";
 
+/**
+ * Sanal klavye bileşeni için props.
+ */
 interface VirtualKeyboardProps {
+  /** Harf tuşuna basıldığında çağrılır */
   onKeyPress: (key: string) => void;
+  /** Silme tuşuna basıldığında çağrılır */
   onBackspace: () => void;
+  /** Gönder tuşuna basıldığında çağrılır */
   onSubmit: () => void;
 }
 
+/**
+ * Mobil cihazlarda cevaplama aşamasında gösterilen sanal Türkçe klavye.
+ * Ekranın altında sabit konumlanır ve sadece sm (640px) altı ekranlarda görünür.
+ * Türkçe karakterleri (Ç, Ğ, İ, Ö, Ş, Ü) içerir.
+ */
 export function VirtualKeyboard({ onKeyPress, onBackspace, onSubmit }: VirtualKeyboardProps) {
+  // Türkçe Q klavye dizilimi (3 satır)
   const rows = [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "Ğ", "Ü"],
     ["A", "S", "D", "F", "G", "H", "J", "K", "L", "Ş", "İ"],

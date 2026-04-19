@@ -15,47 +15,93 @@ import { LeaderboardView } from "./_components/LeaderboardView";
 
 const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY as string;
 
+/**
+ * Ana oyun sayfası bileşeni.
+ * Tüm oyun mantığını, state yönetimini ve kullanıcı etkileşimlerini içerir.
+ * 
+ * Oyun Akışı:
+ * 1. Yükleme -> 2. Giriş Ekranı -> 3. Geri Sayım -> 4. Oyun -> 5. Sonuç/Kayıt -> 6. Liderlik
+ */
 export default function GamePage() {
-  // Splash ve oyun başlatma kontrolü
+  // ==========================================
+  // SPLASH & BAŞLATMA STATE'LERİ
+  // ==========================================
+  
+  /** Oyun başladı mı? (true: oyun ekranı, false: giriş ekranı) */
   const [hasStarted, setHasStarted] = useState(false);
+  /** Geri sayım değeri (3, 2, 1) - null ise geri sayım yok */
   const [countdown, setCountdown] = useState<number | null>(null);
 
-  // Veri durumu state'leri
+  // ==========================================
+  // VERİ STATE'LERİ
+  // ==========================================
+  
+  /** API'den gelen soru listesi (şifre çözülmüş hali) */
   const [questions, setQuestions] = useState<Question[]>([]);
+  /** Veri yükleniyor mu? */
   const [isLoading, setIsLoading] = useState(true);
 
-  // State tanımlamaları
+  // ==========================================
+  // OYUN STATE'LERİ
+  // ==========================================
+  
+  /** Şu anki soru indeksi (0-13 arası) */
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  /** Toplam puan */
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(240); // Toplam 4 dakika (240 saniye)
+  /** Kalan toplam süre (saniye) - başlangıç 240 sn (4 dk) */
+  const [timeLeft, setTimeLeft] = useState(240);
+  /** Oyun aktif mi? (süre bittiğinde false olur) */
   const [isGameActive, setIsGameActive] = useState(true);
+  /** Açılmış harf indeksleri (ipucu olarak gösterilenler) */
   const [revealedLetters, setRevealedLetters] = useState<number[]>([]);
   
-  // Cevaplama aşaması için eklenen state'ler
+  // ==========================================
+  // CEVAPLAMA STATE'LERİ
+  // ==========================================
+  
+  /** Cevaplama modu aktif mi? (30 sn'lik süre başladı mı?) */
   const [isAnswering, setIsAnswering] = useState(false);
+  /** Cevaplama başlangıç zamanı (sayfa yenilenince kalan süreyi hesaplamak için) */
   const [answerStartTime, setAnswerStartTime] = useState<number | null>(null);
+  /** Kullanıcının girdiği cevap metni */
   const [userAnswer, setUserAnswer] = useState("");
+  /** Cevaplama için kalan süre (saniye) */
   const [answerTimeLeft, setAnswerTimeLeft] = useState(30);
+  /** Geçiş animasyonu aktif mi? (doğru/yanlış cevap sonrası bekleme) */
   const [isTransitioning, setIsTransitioning] = useState(false);
+  /** Harf kutuları titriyor mu? (yanlış cevap animasyonu) */
   const [isShaking, setIsShaking] = useState(false);
+  /** Cevap durumu: idle | correct | wrong */
   const [answerStatus, setAnswerStatus] = useState<AnswerStatus>("idle");
+  /** Puan animasyonu aktif mi? */
   const [isScoreAnimating, setIsScoreAnimating] = useState(false);
 
-  // Ayarlar Modalı
+  // ==========================================
+  // UI & AYARLAR STATE'LERİ
+  // ==========================================
+  
+  /** Ayarlar modalı açık mı? */
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  /** Ayarlar modalındaki aktif sekme */
   const [settingsTab, setSettingsTab] = useState<SettingsTab>("nasil");
+  /** Ses efektleri açık mı? */
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
-
-  // Nasıl Oynanır Modalı (Giriş ekranı)
+  /** Nasıl Oynanır modalı açık mı? (giriş ekranında) */
   const [showHowToPlay, setShowHowToPlay] = useState(false);
 
-  // Sayfa kapalıyken cevap süresi dolduysa yükleme sonrası gecikmeyle işlem tetiklemek için
+  // ==========================================
+  // REF'LER
+  // ==========================================
+  
+  /** 
+   * Sayfa kapalıyken (background) cevap süresi dolduysa,
+   * sayfa tekrar açıldığında ceza uygulamak için flag.
+   */
   const pendingTimeoutExpiredRef = useRef(false);
-
-  // Süresonu sesini durdurmak için referans
+  /** Süresonu sesini durdurmak için audio referansı */
   const suresonuAudioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Puan değiştiğinde animasyon tetiklemek için etki
+  /** Mobil cihaz kontrolü (sanal klavye gösterimi için) */
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {

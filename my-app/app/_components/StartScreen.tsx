@@ -2,15 +2,29 @@
 
 import { HowToPlayContent } from "./HowToPlayContent";
 
+/**
+ * Giriş ekranı (Splash screen) bileşeni için props.
+ */
 interface StartScreenProps {
+  /** Oyuna başlat butonuna tıklandığında çağrılır */
   onStart: () => void;
+  /** Nasıl Oynanır butonuna tıklandığında çağrılır */
   onShowHowToPlay: () => void;
+  /** Ayarlar butonuna tıklandığında çağrılır */
   onShowSettings: () => void;
+  /** Geri sayım değeri (3, 2, 1) - null ise gösterilmez */
   countdown: number | null;
+  /** Nasıl Oynanır modalı açık mı? */
   showHowToPlay: boolean;
+  /** Nasıl Oynanır modalı kapatıldığında çağrılır */
   onCloseHowToPlay: () => void;
 }
 
+/**
+ * Oyun başlamadan önce gösterilen giriş ekranı.
+ * Oyuna başlama butonu, Nasıl Oynanır ve Ayarlar erişimi sunar.
+ * Geri sayım overlay'ini de içerir.
+ */
 export function StartScreen({ 
   onStart, 
   onShowHowToPlay, 

@@ -2,12 +2,22 @@
 
 import { useState, useEffect } from "react";
 
+/**
+ * Bir sonraki günlük oyunun başlamasına kalan süreyi gösteren geri sayım bileşeni.
+ * Türkiye saati (UTC+3) baz alınarak gece yarısına kadar olan süreyi HH:MM:SS formatında gösterir.
+ * Leaderboard ekranında kullanılır.
+ */
 export function NextGameTimer() {
   const [timeLeftStr, setTimeLeftStr] = useState<string>("--:--:--");
 
   useEffect(() => {
+    /**
+     * Türkiye saatine göre bir sonraki gece yarısına kalan süreyi hesaplar.
+     * @returns HH:MM:SS formatında süre string'i
+     */
     const calculateTimeLeft = () => {
       const now = new Date();
+      // Türkiye saatine çevir (UTC+3)
       const turkeyNow = new Date(now.getTime() + 3 * 60 * 60 * 1000);
       const nextMidnight = new Date(
         Date.UTC(turkeyNow.getUTCFullYear(), turkeyNow.getUTCMonth(), turkeyNow.getUTCDate() + 1, 0, 0, 0)
@@ -30,7 +40,10 @@ export function NextGameTimer() {
       return `${hh}:${mm}:${ss}`;
     };
 
+    // İlk hesaplama
     setTimeLeftStr(calculateTimeLeft());
+    
+    // Her saniye güncelle
     const interval = setInterval(() => {
       setTimeLeftStr(calculateTimeLeft());
     }, 1000);
