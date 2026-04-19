@@ -4,131 +4,16 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import CryptoJS from "crypto-js";
 import { saveScoreAction, getUserStatsAction } from "./actions";
+import { Question, LeaderboardRow, UserStats, AnswerStatus, SettingsTab } from "../types";
+import { playSound, getOrCreateUserId, formatTime, getTurkeyDateStr, getTurkeyFormattedDate } from "../lib/utils";
+import { NextGameTimer } from "./_components/NextGameTimer";
+import { VirtualKeyboard } from "./_components/VirtualKeyboard";
+import { SettingsModal } from "./_components/SettingsModal";
+import { StartScreen } from "./_components/StartScreen";
+import { GameOverModal } from "./_components/GameOverModal";
+import { LeaderboardView } from "./_components/LeaderboardView";
 
-function playSound(src: string, enabled: boolean) {
-  if (!enabled) return;
-  const audio = new Audio(src);
-  audio.volume = 0.6;
-  audio.play().catch(() => {});
-}
-
-function getOrCreateUserId(): string {
-  const KEY = "zipir_user_id";
-  let id = localStorage.getItem(KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(KEY, id);
-  }
-  return id;
-}
-
-// Şifre çözmek için API'dekiyle aynı anahtarı kullanmalıyız (.env'den).
 const ENCRYPTION_KEY = process.env.NEXT_PUBLIC_ENCRYPTION_KEY as string;
-
-function NextGameTimer() {
-  const [timeLeftStr, setTimeLeftStr] = useState<string>("--:--:--");
-
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const turkeyNow = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-      const nextMidnight = new Date(
-        Date.UTC(turkeyNow.getUTCFullYear(), turkeyNow.getUTCMonth(), turkeyNow.getUTCDate() + 1, 0, 0, 0)
-        - 3 * 60 * 60 * 1000
-      );
-      const diffMs = nextMidnight.getTime() - now.getTime();
-
-      if (diffMs <= 0) {
-        return "00:00:00";
-      }
-
-      const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((diffMs / (1000 * 60)) % 60);
-      const seconds = Math.floor((diffMs / 1000) % 60);
-
-      const hh = String(hours).padStart(2, "0");
-      const mm = String(minutes).padStart(2, "0");
-      const ss = String(seconds).padStart(2, "0");
-
-      return `${hh}:${mm}:${ss}`;
-    };
-
-    setTimeLeftStr(calculateTimeLeft());
-    const interval = setInterval(() => {
-      setTimeLeftStr(calculateTimeLeft());
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="flex flex-col items-center sm:items-start">
-      <p className="text-xs font-semibold text-slate-400 mb-0.5 tracking-wider uppercase">
-        Yeni Oyuna Kalan
-      </p>
-      <div className="text-xl sm:text-2xl font-bold text-violet-600 font-mono tracking-tight">
-        {timeLeftStr}
-      </div>
-    </div>
-  );
-}
-
-const VirtualKeyboard = ({
-  onKeyPress,
-  onBackspace,
-  onSubmit,
-}: {
-  onKeyPress: (key: string) => void;
-  onBackspace: () => void;
-  onSubmit: () => void;
-}) => {
-  const rows = [
-    ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "Ğ", "Ü"],
-    ["A", "S", "D", "F", "G", "H", "J", "K", "L", "Ş", "İ"],
-    ["Z", "X", "C", "V", "B", "N", "M", "Ö", "Ç"]
-  ];
-
-  return (
-    <div className="fixed bottom-0 left-0 right-0 w-full bg-slate-200/95 backdrop-blur-md p-2 pb-8 sm:hidden z-50 animate-in slide-in-from-bottom border-t border-slate-300 shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
-      <div className="flex flex-col gap-2 max-w-lg mx-auto">
-        {rows.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex justify-center gap-1.5">
-            {rowIndex === 2 && (
-              <button
-                type="button"
-                onClick={(e) => { e.preventDefault(); onBackspace(); }}
-                className="flex-[1.5] bg-slate-400 text-white font-bold rounded-lg py-3.5 px-2 text-xs active:scale-95 transition-transform flex items-center justify-center shadow-sm"
-              >
-                SİL
-              </button>
-            )}
-            
-            {row.map((key) => (
-              <button
-                key={key}
-                type="button"
-                onClick={(e) => { e.preventDefault(); onKeyPress(key); }}
-                className="flex-1 bg-white text-violet-700 font-bold text-sm rounded-lg py-3.5 shadow-sm active:scale-95 active:bg-violet-100 active:text-violet-800 transition-all flex items-center justify-center border border-slate-100"
-              >
-                {key}
-              </button>
-            ))}
-
-            {rowIndex === 2 && (
-              <button
-                type="button"
-                onClick={(e) => { e.preventDefault(); onSubmit(); }}
-                className="flex-[2] bg-violet-600 text-white font-bold rounded-lg py-3.5 px-2 text-xs active:scale-95 transition-transform shadow-md flex items-center justify-center"
-              >
-                GÖNDER
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 export default function GamePage() {
   // Splash ve oyun başlatma kontrolü
@@ -136,7 +21,7 @@ export default function GamePage() {
   const [countdown, setCountdown] = useState<number | null>(null);
 
   // Veri durumu state'leri
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // State tanımlamaları
@@ -153,12 +38,12 @@ export default function GamePage() {
   const [answerTimeLeft, setAnswerTimeLeft] = useState(30);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
-  const [answerStatus, setAnswerStatus] = useState<"idle" | "correct" | "wrong">("idle");
+  const [answerStatus, setAnswerStatus] = useState<AnswerStatus>("idle");
   const [isScoreAnimating, setIsScoreAnimating] = useState(false);
 
   // Ayarlar Modalı
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [settingsTab, setSettingsTab] = useState<"ses" | "tema" | "nasil">("nasil");
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>("nasil");
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
 
   // Nasıl Oynanır Modalı (Giriş ekranı)
@@ -182,12 +67,6 @@ export default function GamePage() {
 
   // bfcache'den geri yükleme veya sekme ertesi gün açılırsa sayfayı yenile
   useEffect(() => {
-    const getTurkeyDateStr = () => {
-      const d = new Date();
-      const t = new Date(d.getTime() + 3 * 60 * 60 * 1000);
-      return `${t.getUTCFullYear()}-${String(t.getUTCMonth() + 1).padStart(2, "0")}-${String(t.getUTCDate()).padStart(2, "0")}`;
-    };
-
     // Opera/Chrome sekme geri yüklemesi: sayfa reload edilmeden bellekten geliyorsa yenile
     const handlePageShow = (e: PageTransitionEvent) => {
       if (e.persisted) {
@@ -253,17 +132,12 @@ export default function GamePage() {
   const [nickname, setNickname] = useState("");
   const [isSavingScore, setIsSavingScore] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
-  const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardRow[]>([]);
   const [showToast, setShowToast] = useState(false); // Kopyalandı bildirimi için (genel)
   const [isCopied, setIsCopied] = useState(false); // Sadece leaderboard'daki buton için lokal toolitp
 
   // Kullanıcı istatistikleri
-  const [userStats, setUserStats] = useState<{
-    totalGames: number;
-    bestScore: number;
-    avgScore: number;
-    streak: number;
-  } | null>(null);
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
 
   const fetchLeaderboard = async (dateStr: string) => {
     try {
@@ -313,10 +187,10 @@ export default function GamePage() {
           return;
         }
 
-        let sorted: any[] = [];
+        let sorted: Question[] = [];
         if (resData.questions && resData.questions.length > 0) {
           // Gelen şifreli kelimeleri cihazda (client'ta) çözüyoruz
-          const decryptedData = resData.questions.map((q: any) => {
+          const decryptedData = resData.questions.map((q: Question) => {
             try {
               const bytes = CryptoJS.AES.decrypt(q.word, ENCRYPTION_KEY);
               const originalWord = bytes.toString(CryptoJS.enc.Utf8);
@@ -328,7 +202,7 @@ export default function GamePage() {
           });
 
           // Gelen soruları cevap uzunluğuna göre sırala (4 harfliden 10 harfliye)
-          sorted = decryptedData.sort((a: any, b: any) => a.word.length - b.word.length);
+          sorted = decryptedData.sort((a: Question, b: Question) => a.word.length - b.word.length);
           setQuestions(sorted);
         }
 
@@ -639,13 +513,6 @@ export default function GamePage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isGameActive, isAnswering, questions, currentQuestionIndex, revealedLetters.length]);
 
-  // Süreyi formatlayan fonksiyon
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen w-full bg-slate-50 flex flex-col items-center justify-center p-4">
@@ -677,294 +544,21 @@ export default function GamePage() {
   if (!hasStarted) {
     return (
       <>
-        {/* Floating Header — oyun ekranıyla aynı dil */}
-        <div className="fixed top-0 left-0 w-full z-40 pt-2 sm:pt-4 flex justify-center pointer-events-none">
-          <div className="w-full max-w-4xl px-4 flex justify-center">
-            <header className="pointer-events-auto w-full bg-white/90 backdrop-blur-md shadow-md shadow-slate-200/50 border border-slate-200 rounded-2xl px-2 py-2 sm:px-3 flex items-center justify-between gap-1 sm:gap-4">
-              {/* Sol: Ayarlar Butonu */}
-              <div className="flex-1 flex justify-start shrink-0">
-                <button
-                  onClick={() => setShowSettingsModal(true)}
-                  aria-label="Ayarlar"
-                  className="p-2 rounded-xl text-slate-400 hover:text-violet-600 hover:bg-violet-50 active:scale-95 transition-all"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-                    <circle cx="12" cy="12" r="3"/>
-                  </svg>
-                </button>
-              </div>
-
-              {/* Orta: Logo */}
-              <div className="flex justify-center shrink-1 px-1 sm:px-2">
-                <h1 className="text-3xl sm:text-4xl font-nunito font-black tracking-tight text-violet-600">
-                  ZIPIR<span className="text-violet-400 italic">!</span>
-                </h1>
-              </div>
-
-              {/* Sağ: boşluk dengeleyici */}
-              <div className="flex-1 flex justify-end shrink-0">
-                <div className="w-9 h-9 sm:w-10 sm:h-10" />
-              </div>
-            </header>
-          </div>
-        </div>
-
-        {/* Ana İçerik */}
-        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 font-sans text-slate-800">
-          <p className="text-xs font-semibold text-slate-400 tracking-widest uppercase mb-10 select-none">
-            Günlük Kelime Oyunu
-          </p>
-
-          <button
-            onClick={() => setCountdown(3)}
-            className="w-full max-w-xs px-8 py-5 bg-violet-600 hover:bg-violet-700 text-white text-xl font-bold rounded-2xl shadow-lg shadow-violet-200 hover:shadow-xl hover:shadow-violet-300 transition-all active:scale-95 flex items-center justify-center gap-3"
-          >
-            <span>Oyuna Başla</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-            </svg>
-          </button>
-
-          <button
-            onClick={() => setShowHowToPlay(true)}
-            className="mt-4 w-full max-w-xs px-8 py-3.5 bg-white hover:bg-slate-50 text-slate-600 hover:text-violet-600 text-base font-semibold rounded-2xl border border-slate-200 hover:border-violet-200 shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-            <span>Nasıl Oynanır?</span>
-          </button>
-        </div>
-
-        {/* Ayarlar Modalı */}
-        {showSettingsModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowSettingsModal(false)}>
-            <div
-              className="bg-white rounded-2xl w-full max-w-md shadow-xl border border-slate-100 relative max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100">
-                <h3 className="text-xl font-black text-slate-800">Ayarlar</h3>
-                <button
-                  onClick={() => setShowSettingsModal(false)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 active:scale-95 transition-all"
-                  aria-label="Kapat"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </button>
-              </div>
-              <div className="flex border-b border-slate-100 px-6">
-                {(["nasil", "ses", "tema"] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setSettingsTab(tab)}
-                    className={`py-3 px-4 text-sm font-semibold border-b-2 transition-colors -mb-px ${
-                      settingsTab === tab
-                        ? "border-violet-500 text-violet-600"
-                        : "border-transparent text-slate-400 hover:text-slate-600"
-                    }`}
-                  >
-                    {tab === "nasil" ? "Nasıl Oynanır?" : tab === "ses" ? "Ses" : "Tema"}
-                  </button>
-                ))}
-              </div>
-              <div className="p-6">
-                {settingsTab === "nasil" && (
-                  <ul className="space-y-4">
-                    <li className="flex items-start gap-3">
-                      <div className="flex-shrink-0 bg-violet-100 text-violet-600 p-2 rounded-xl">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-                      </div>
-                      <p className="text-slate-600 text-sm leading-snug pt-0.5"><strong className="text-slate-800">14 Soru:</strong> 4 harfliden 10 harfliye kadar her harf grubundan 2&apos;şer soru sorulur.</p>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <div className="flex-shrink-0 bg-amber-100 text-amber-600 p-2 rounded-xl">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                      </div>
-                      <p className="text-slate-600 text-sm leading-snug pt-0.5">Tüm oyunu tamamlamak için <strong className="text-amber-600">toplam süreniz 4 dakikadır</strong>.</p>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <div className="flex-shrink-0 bg-blue-100 text-blue-600 p-2 rounded-xl">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
-                      </div>
-                      <p className="text-slate-600 text-sm leading-snug pt-0.5">Her harfin puan değeri <strong className="text-blue-600">100&apos;dür</strong>. <strong className="text-slate-800">&quot;Harf Al&quot;</strong> butonuna bastıkça toplam puandan <strong className="text-red-500">100 düşer</strong>.</p>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <div className="flex-shrink-0 bg-emerald-100 text-emerald-600 p-2 rounded-xl">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2" ry="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/><path d="M7 16h10"/></svg>
-                      </div>
-                      <p className="text-slate-600 text-sm leading-snug pt-0.5"><strong className="text-slate-800">&quot;Cevapla&quot;</strong> dedikten sonra ana süre durur, <strong className="text-emerald-600">30 saniyelik cevaplama süreniz</strong> başlar.</p>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <div className="flex-shrink-0 bg-red-100 text-red-600 p-2 rounded-xl">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                      </div>
-                      <p className="text-slate-600 text-sm leading-snug pt-0.5"><strong className="text-slate-800">Dikkat:</strong> Cevaplama süreniz biterse, o an alınabilecek puan <strong className="text-red-600">eksi puan (-)</strong> olarak hanenize yansır.</p>
-                    </li>
-                  </ul>
-                )}
-                {settingsTab === "ses" && (
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-violet-100 text-violet-600 rounded-lg">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            {isSoundEnabled ? (<><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></>) : (<><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></>)}
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="font-semibold text-slate-800 text-sm">Oyun Sesleri</p>
-                          <p className="text-xs text-slate-400 mt-0.5">Doğru/yanlış cevap efektleri</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setIsSoundEnabled((p) => !p)}
-                        className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${isSoundEnabled ? "bg-violet-500" : "bg-slate-300"}`}
-                        role="switch"
-                        aria-checked={isSoundEnabled}
-                      >
-                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${isSoundEnabled ? "translate-x-6" : "translate-x-0"}`} />
-                      </button>
-                    </div>
-                  </div>
-                )}
-                {settingsTab === "tema" && (
-                  <div className="flex flex-col gap-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <button className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-violet-500 bg-violet-50 transition-all">
-                        <div className="w-full h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center">
-                          <span className="text-xs font-bold text-slate-700">Aa</span>
-                        </div>
-                        <span className="text-xs font-semibold text-violet-700">Açık</span>
-                        <span className="w-2 h-2 rounded-full bg-violet-500"></span>
-                      </button>
-                      <button className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 bg-slate-50 opacity-50 cursor-not-allowed transition-all" disabled>
-                        <div className="w-full h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center">
-                          <span className="text-xs font-bold text-slate-200">Aa</span>
-                        </div>
-                        <span className="text-xs font-semibold text-slate-500">Koyu</span>
-                        <span className="text-[10px] text-slate-400">Yakında</span>
-                      </button>
-                    </div>
-                    <p className="text-xs text-slate-400 text-center">Koyu tema yakında kullanıma açılacak.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Nasıl Oynanır Modalı */}
-        {showHowToPlay && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
-            onClick={() => setShowHowToPlay(false)}
-          >
-            <div
-              className="bg-white rounded-2xl w-full max-w-md shadow-xl border border-slate-100 relative max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100">
-                <h3 className="text-xl font-black text-slate-800">Nasıl Oynanır?</h3>
-                <button
-                  onClick={() => setShowHowToPlay(false)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 active:scale-95 transition-all"
-                  aria-label="Kapat"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </button>
-              </div>
-
-              <div className="p-6">
-                <ul className="space-y-4">
-                  <li className="flex items-start gap-3">
-                    <div className="flex-shrink-0 bg-violet-100 text-violet-600 p-2 rounded-xl">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
-                      </svg>
-                    </div>
-                    <p className="text-slate-600 text-sm leading-snug pt-0.5">
-                      <strong className="text-slate-800">14 Soru:</strong> 4 harfliden 10 harfliye kadar her harf grubundan 2&apos;şer soru sorulur.
-                    </p>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="flex-shrink-0 bg-amber-100 text-amber-600 p-2 rounded-xl">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                      </svg>
-                    </div>
-                    <p className="text-slate-600 text-sm leading-snug pt-0.5">
-                      Tüm oyunu tamamlamak için <strong className="text-amber-600">toplam süreniz 4 dakikadır</strong>.
-                    </p>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="flex-shrink-0 bg-blue-100 text-blue-600 p-2 rounded-xl">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>
-                      </svg>
-                    </div>
-                    <p className="text-slate-600 text-sm leading-snug pt-0.5">
-                      Her harfin puan değeri <strong className="text-blue-600">100&apos;dür</strong>. <strong className="text-slate-800">&quot;Harf Al&quot;</strong> butonuna bastıkça kelimeden alabileceğiniz toplam puandan <strong className="text-red-500">100 düşer</strong>.
-                    </p>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="flex-shrink-0 bg-emerald-100 text-emerald-600 p-2 rounded-xl">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect width="20" height="16" x="2" y="4" rx="2" ry="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/><path d="M7 16h10"/>
-                      </svg>
-                    </div>
-                    <p className="text-slate-600 text-sm leading-snug pt-0.5">
-                      <strong className="text-slate-800">&quot;Cevapla&quot;</strong> dedikten sonra ana süre durur, <strong className="text-emerald-600">30 saniyelik cevaplama süreniz</strong> başlar ve süre bitene kadar cevap deneyebilirsiniz.
-                    </p>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="flex-shrink-0 bg-red-100 text-red-600 p-2 rounded-xl">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                      </svg>
-                    </div>
-                    <p className="text-slate-600 text-sm leading-snug pt-0.5">
-                      <strong className="text-slate-800">Dikkat:</strong> Cevaplama süreniz biterse, o an alınabilecek puan <strong className="text-red-600">eksi puan (-)</strong> olarak hanenize yansır.
-                    </p>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Geri Sayım Overlay */}
-        {countdown !== null && countdown > 0 && (
-          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-white/90 backdrop-blur-sm">
-            <div key={countdown} className="relative flex items-center justify-center">
-              <span
-                aria-hidden
-                className="absolute font-nunito font-black text-violet-400 text-8xl md:text-9xl select-none leading-none pointer-events-none animate-countdown-ripple"
-              >
-                {countdown}
-              </span>
-              <span className="relative font-nunito font-black text-violet-600 text-8xl md:text-9xl select-none leading-none tracking-tight drop-shadow-sm animate-countdown-pop">
-                {countdown}
-              </span>
-            </div>
-
-            <div className="flex gap-2">
-              {[3, 2, 1].map((n) => (
-                <span
-                  key={n}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    n >= countdown ? "bg-violet-500 scale-125" : "bg-slate-200"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+        <SettingsModal
+          isOpen={showSettingsModal}
+          onClose={() => setShowSettingsModal(false)}
+          initialTab={settingsTab}
+          isSoundEnabled={isSoundEnabled}
+          onSoundToggle={() => setIsSoundEnabled((p) => !p)}
+        />
+        <StartScreen
+          onStart={() => setCountdown(3)}
+          onShowHowToPlay={() => setShowHowToPlay(true)}
+          onShowSettings={() => setShowSettingsModal(true)}
+          countdown={countdown}
+          showHowToPlay={showHowToPlay}
+          onCloseHowToPlay={() => setShowHowToPlay(false)}
+        />
       </>
     );
   }
@@ -1127,342 +721,34 @@ export default function GamePage() {
 
       {/* Liderlik Tablosu Görünümü */}
       {showLeaderboard ? (
-        <div className="w-full flex-1 flex flex-col justify-center items-center p-4">
-          {/* Logo */}
-          <h1 className="text-3xl sm:text-4xl font-nunito font-black tracking-tight text-violet-600 mb-3 drop-shadow-sm">
-            ZIPIR<span className="text-violet-400 italic">!</span>
-          </h1>
-
-          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-sm border border-slate-100 p-5 sm:p-6 text-center">
-            <h2 className="text-xl sm:text-2xl font-black text-violet-500 mb-4 border-b border-slate-100 pb-3">
-              Bugünün Liderlik Tablosu
-            </h2>
-
-            {/* Kişisel İstatistikler */}
-            {userStats && (
-              <div className="mb-4 pb-4 border-b border-slate-100">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Senin İstatistiklerin</p>
-                <div className="grid grid-cols-4 gap-2 sm:gap-4">
-                  <div className="flex flex-col items-center bg-amber-50 rounded-xl p-2 sm:p-3 border border-amber-100">
-                    <span className="text-xl sm:text-2xl font-black text-amber-500">{userStats.streak}</span>
-                    <span className="flex items-center gap-0.5 text-[10px] font-semibold text-amber-600 mt-0.5 leading-tight">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                      Seri
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center bg-violet-50 rounded-xl p-2 sm:p-3 border border-violet-100">
-                    <span className="text-xl sm:text-2xl font-black text-violet-600">{userStats.bestScore}</span>
-                    <span className="flex items-center gap-0.5 text-[10px] font-semibold text-violet-500 mt-0.5 leading-tight">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                      En İyi
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center bg-blue-50 rounded-xl p-2 sm:p-3 border border-blue-100">
-                    <span className="text-xl sm:text-2xl font-black text-blue-500">{userStats.avgScore}</span>
-                    <span className="flex items-center gap-0.5 text-[10px] font-semibold text-blue-500 mt-0.5 leading-tight">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                      Ortalama
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center bg-emerald-50 rounded-xl p-2 sm:p-3 border border-emerald-100">
-                    <span className="text-xl sm:text-2xl font-black text-emerald-600">{userStats.totalGames}</span>
-                    <span className="flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600 mt-0.5 leading-tight">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                      Toplam
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-            {leaderboardData.length === 0 ? (
-              <p className="text-slate-500 py-8">Henüz bir skor kaydedilmemiş.</p>
-            ) : (
-              <div className="w-full max-h-48 sm:max-h-56 overflow-y-auto pr-2 overflow-x-auto">
-                <table className="w-full text-left border-collapse cursor-default text-sm sm:text-base">
-                  <thead className="sticky top-0 z-10 bg-white">
-                    <tr className="bg-slate-100 text-slate-600 text-xs sm:text-sm">
-                      <th className="py-2 px-3 rounded-tl-lg font-semibold">#</th>
-                      <th className="py-2 px-3 font-semibold">Oyuncu</th>
-                      <th className="py-2 px-3 font-semibold text-center">Puan</th>
-                      <th className="py-2 px-3 rounded-tr-lg font-semibold text-right">Süre</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {leaderboardData.map((item, idx) => {
-                      const isMe = nickname && item.nickname === nickname;
-                      return (
-                        <tr key={idx} className={`border-b last:border-none transition-colors ${isMe ? "bg-violet-50 border-violet-100" : "border-slate-50 hover:bg-slate-50"}`}>
-                          <td className={`py-2 px-3 font-medium ${isMe ? "text-violet-600" : "text-slate-500"}`}>{idx + 1}</td>
-                          <td className={`py-2 px-3 font-bold ${isMe ? "text-violet-700" : "text-slate-700"}`}>
-                            {item.nickname}
-                            {isMe && <span className="ml-1.5 text-[10px] font-semibold text-violet-400 uppercase tracking-wide">(sen)</span>}
-                          </td>
-                          <td className={`py-2 px-3 font-black text-center ${isMe ? "text-violet-600" : "text-violet-600"}`}>{item.score}</td>
-                          <td className={`py-2 px-3 font-mono text-right ${isMe ? "text-violet-500" : "text-slate-500"}`}>{item.time_left} sn</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-4 border-t border-slate-100">
-              <NextGameTimer />
-
-              <div className="relative">
-                {isCopied && (
-                  <div className="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-800 text-white text-xs px-2.5 py-1.5 rounded-md shadow-md animate-in fade-in zoom-in duration-200">
-                    Panoya kopyalandı!
-                  </div>
-                )}
-                <button
-                  onClick={handleShareResult}
-                  className="px-5 py-2.5 bg-violet-600 text-white text-sm font-semibold rounded-xl shadow-sm hover:bg-violet-700 active:scale-95 transition-all flex items-center gap-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
-                  </svg>
-                  Sonucumu Paylaş
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <LeaderboardView
+          data={leaderboardData}
+          userStats={userStats}
+          nickname={nickname}
+          onShare={handleShareResult}
+          isCopied={isCopied}
+        />
       ) : (
         <>
-          {/* Ayarlar Modalı */}
-          {showSettingsModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowSettingsModal(false)}>
-              <div
-                className="bg-white rounded-2xl w-full max-w-md shadow-xl border border-slate-100 relative max-h-[90vh] overflow-y-auto"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Modal Başlık */}
-                <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100">
-                  <h3 className="text-xl font-black text-slate-800">Ayarlar</h3>
-                  <button
-                    onClick={() => setShowSettingsModal(false)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 active:scale-95 transition-all"
-                    aria-label="Kapat"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                  </button>
-                </div>
+          <SettingsModal
+            isOpen={showSettingsModal}
+            onClose={() => setShowSettingsModal(false)}
+            initialTab={settingsTab}
+            isSoundEnabled={isSoundEnabled}
+            onSoundToggle={() => setIsSoundEnabled((p) => !p)}
+          />
 
-                {/* Sekme Başlıkları */}
-                <div className="flex border-b border-slate-100 px-6">
-                  {(["nasil", "ses", "tema"] as const).map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setSettingsTab(tab)}
-                      className={`py-3 px-4 text-sm font-semibold border-b-2 transition-colors -mb-px ${
-                        settingsTab === tab
-                          ? "border-violet-500 text-violet-600"
-                          : "border-transparent text-slate-400 hover:text-slate-600"
-                      }`}
-                    >
-                      {tab === "nasil" ? "Nasıl Oynanır?" : tab === "ses" ? "Ses" : "Tema"}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Sekme İçerikleri */}
-                <div className="p-6">
-                  {/* Nasıl Oynanır? */}
-                  {settingsTab === "nasil" && (
-                    <ul className="space-y-4">
-                      <li className="flex items-start gap-3">
-                        <div className="flex-shrink-0 bg-violet-100 text-violet-600 p-2 rounded-xl">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
-                          </svg>
-                        </div>
-                        <p className="text-slate-600 text-sm leading-snug pt-0.5">
-                          <strong className="text-slate-800">14 Soru:</strong> 4 harfliden 10 harfliye kadar her harf grubundan 2'şer soru sorulur.
-                        </p>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <div className="flex-shrink-0 bg-amber-100 text-amber-600 p-2 rounded-xl">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                          </svg>
-                        </div>
-                        <p className="text-slate-600 text-sm leading-snug pt-0.5">
-                          Tüm oyunu tamamlamak için <strong className="text-amber-600">toplam süreniz 4 dakikadır</strong>.
-                        </p>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <div className="flex-shrink-0 bg-blue-100 text-blue-600 p-2 rounded-xl">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>
-                          </svg>
-                        </div>
-                        <p className="text-slate-600 text-sm leading-snug pt-0.5">
-                          Her harfin puan değeri <strong className="text-blue-600">100'dür</strong>. <strong className="text-slate-800">"Harf Al"</strong> butonuna bastıkça kelimeden alabileceğiniz toplam puandan <strong className="text-red-500">100 düşer</strong>.
-                        </p>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <div className="flex-shrink-0 bg-emerald-100 text-emerald-600 p-2 rounded-xl">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect width="20" height="16" x="2" y="4" rx="2" ry="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/><path d="M7 16h10"/>
-                          </svg>
-                        </div>
-                        <p className="text-slate-600 text-sm leading-snug pt-0.5">
-                          <strong className="text-slate-800">"Cevapla"</strong> dedikten sonra ana süre durur, <strong className="text-emerald-600">30 saniyelik cevaplama süreniz</strong> başlar.
-                        </p>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <div className="flex-shrink-0 bg-red-100 text-red-600 p-2 rounded-xl">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                          </svg>
-                        </div>
-                        <p className="text-slate-600 text-sm leading-snug pt-0.5">
-                          <strong className="text-slate-800">Dikkat:</strong> Cevaplama süreniz biterse, o an alınabilecek puan <strong className="text-red-600">eksi puan (-)</strong> olarak hanenize yansır.
-                        </p>
-                      </li>
-                    </ul>
-                  )}
-
-                  {/* Ses */}
-                  {settingsTab === "ses" && (
-                    <div className="flex flex-col gap-4">
-                      <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-violet-100 text-violet-600 rounded-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              {isSoundEnabled ? (
-                                <>
-                                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-                                </>
-                              ) : (
-                                <>
-                                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                                  <line x1="23" y1="9" x2="17" y2="15"/>
-                                  <line x1="17" y1="9" x2="23" y2="15"/>
-                                </>
-                              )}
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-slate-800 text-sm">Oyun Sesleri</p>
-                            <p className="text-xs text-slate-400 mt-0.5">Doğru/yanlış cevap efektleri</p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => setIsSoundEnabled((p) => !p)}
-                          className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${isSoundEnabled ? "bg-violet-500" : "bg-slate-300"}`}
-                          role="switch"
-                          aria-checked={isSoundEnabled}
-                        >
-                          <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${isSoundEnabled ? "translate-x-6" : "translate-x-0"}`} />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Tema */}
-                  {settingsTab === "tema" && (
-                    <div className="flex flex-col gap-4">
-                      <div className="grid grid-cols-2 gap-3">
-                        <button className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-violet-500 bg-violet-50 transition-all">
-                          <div className="w-full h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center">
-                            <span className="text-xs font-bold text-slate-700">Aa</span>
-                          </div>
-                          <span className="text-xs font-semibold text-violet-700">Açık</span>
-                          <span className="w-2 h-2 rounded-full bg-violet-500"></span>
-                        </button>
-                        <button className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 bg-slate-50 opacity-50 cursor-not-allowed transition-all" disabled>
-                          <div className="w-full h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center">
-                            <span className="text-xs font-bold text-slate-200">Aa</span>
-                          </div>
-                          <span className="text-xs font-semibold text-slate-500">Koyu</span>
-                          <span className="text-[10px] text-slate-400">Yakında</span>
-                        </button>
-                      </div>
-                      <p className="text-xs text-slate-400 text-center">Koyu tema yakında kullanıma açılacak.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Oyun Bitti Modalı */}
           {showGameOverModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-              <div className="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-md shadow-xl border border-slate-100 relative max-h-[90vh] overflow-y-auto">
-
-                <h3 className="text-3xl font-black text-center text-slate-800 mb-5">Oyun Bitti!</h3>
-
-                {/* Skor Kartı */}
-                <div className="flex justify-center gap-6 mb-6 bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                  <div className="text-center">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Toplam Puan</p>
-                    <p className="text-4xl font-black text-violet-500">{score}</p>
-                  </div>
-                  <div className="w-px bg-slate-200"></div>
-                  <div className="text-center">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Kalan Süre</p>
-                    <p className="text-4xl font-mono text-slate-700">{formatTime(timeLeft)}</p>
-                  </div>
-                </div>
-
-                {/* Birincil Aksiyon: Paylaş */}
-                <div className="relative mb-6">
-                  {isCopied && (
-                    <div className="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-800 text-white text-xs px-3 py-1.5 rounded-md shadow-md animate-in fade-in zoom-in duration-200">
-                      Panoya kopyalandı!
-                    </div>
-                  )}
-                  <button
-                    onClick={handleShareResult}
-                    className="w-full px-6 py-4 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl shadow-md shadow-violet-200 transition-all active:scale-95 flex items-center justify-center gap-2 text-base"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
-                    </svg>
-                    Sonucumu Paylaş
-                  </button>
-                </div>
-
-                {/* Ayırıcı */}
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="flex-1 h-px bg-slate-100"></div>
-                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Skor Tablosuna Gir</span>
-                  <div className="flex-1 h-px bg-slate-100"></div>
-                </div>
-
-                {/* İkincil Aksiyon: Kaydet */}
-                <form onSubmit={handleSaveScore} className="space-y-3">
-                  <input
-                    type="text"
-                    value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
-                    placeholder="Ad veya Rumuz"
-                    maxLength={15}
-                    className="w-full px-4 py-3 text-center text-base font-semibold border-2 border-slate-200 rounded-xl focus:border-violet-500 focus:outline-none focus:ring-4 focus:ring-violet-500/10 transition-all"
-                    required
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSavingScore || !nickname.trim()}
-                    className="w-full bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-violet-300 text-slate-500 hover:text-violet-600 font-semibold py-3 rounded-xl transition-all active:scale-95 text-sm disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                    {isSavingScore ? "Kaydediliyor..." : "Skoru Kaydet & Liderliğe Gir"}
-                  </button>
-                </form>
-
-              </div>
-            </div>
+            <GameOverModal
+              score={score}
+              timeLeft={timeLeft}
+              nickname={nickname}
+              onNicknameChange={setNickname}
+              onSave={handleSaveScore}
+              onShare={handleShareResult}
+              isSaving={isSavingScore}
+              isCopied={isCopied}
+            />
           )}
 
           {/* OYUN ANA EKRANI (Ana Tasarım) */}
