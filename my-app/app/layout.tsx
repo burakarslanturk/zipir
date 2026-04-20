@@ -15,15 +15,19 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "ZIPIR! | Kelime Oyunu",
-  description: "Bugün hiç harf almadan tamamlayabilecek misin? Hadi arkadaşlarına meydan oku!",
+  title: "ZIPIR! - Kelime Oyunu",
+  description: "Her gün 14 yeni soru, 4 dakika. Bugün hiç harf almadan tamamlayabilecek misin? Haydi arkadaşlarına meydan oku!",
+  metadataBase: new URL("https://zipir.app"),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "ZIPIR! | Kelime Oyunu",
-    description: "Bugün hiç harf almadan tamamlayabilecek misin? Hadi arkadaşlarına meydan oku!",
+    title: "ZIPIR! - Kelime Oyunu",
+    description: "Her gün 14 yeni soru, 4 dakika. Bugün hiç harf almadan tamamlayabilecek misin? Haydi arkadaşlarına meydan oku!",
+    url: "https://zipir.app",
     siteName: "ZIPIR!",
     locale: "tr_TR",
     type: "website",
-    url: "https://zipir.app",
     images: [
       {
         url: "/og-image.jpg",
@@ -35,9 +39,14 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ZIPIR! | Kelime Oyunu",
-    description: "Bugün hiç harf almadan tamamlayabilecek misin? Hadi arkadaşlarına meydan oku!",
+    title: "ZIPIR! - Kelime Oyunu",
+    description: "Her gün 14 yeni soru, 4 dakika. Bugün hiç harf almadan tamamlayabilecek misin? Haydi arkadaşlarına meydan oku!",
     images: ["/og-image.jpg"],
+  },
+  themeColor: "#7c3aed",
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
@@ -52,6 +61,11 @@ export default function RootLayout({
       className={`${nunito.variable} ${outfit.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <link rel="manifest" href="/site.webmanifest" />
+        <meta name="theme-color" content="#7c3aed" />
+        <link rel="apple-touch-icon" href="/icon.png" />
+      </head>
       <body className="min-h-full flex flex-col font-sans">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}

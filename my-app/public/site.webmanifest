@@ -1,0 +1,15 @@
+{
+  "name": "ZIPIR! - Kelime Oyunu",
+  "short_name": "ZIPIR!",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
