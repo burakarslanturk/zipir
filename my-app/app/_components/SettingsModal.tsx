@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import { SettingsTab } from "../../types";
 import { HowToPlayContent } from "./HowToPlayContent";
 
@@ -34,25 +35,28 @@ export function SettingsModal({
 }: SettingsModalProps) {
   // Aktif sekme state'i
   const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
+  
+  // Tema hook'u
+  const { theme, setTheme } = useTheme();
 
   // Modal kapalıysa render etme
   if (!isOpen) return null;
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-sm" 
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-md shadow-xl border border-slate-100 relative max-h-[90vh] overflow-y-auto"
+        className="bg-[var(--card)] rounded-2xl w-full max-w-md shadow-xl border border-[var(--card-border)] relative max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Başlık */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100">
-          <h3 className="text-xl font-black text-slate-800">Ayarlar</h3>
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[var(--card-border)]">
+          <h3 className="text-xl font-black text-[var(--text-primary)]">Ayarlar</h3>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 active:scale-95 transition-all"
+            className="p-1.5 rounded-lg text-[var(--slate-400)] hover:text-[var(--slate-600)] hover:bg-[var(--slate-100)] active:scale-95 transition-all"
             aria-label="Kapat"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -63,15 +67,15 @@ export function SettingsModal({
         </div>
 
         {/* Sekme Başlıkları */}
-        <div className="flex border-b border-slate-100 px-6">
+        <div className="flex border-b border-[var(--card-border)] px-6">
           {(["nasil", "ses", "tema"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`py-3 px-4 text-sm font-semibold border-b-2 transition-colors -mb-px ${
                 activeTab === tab
-                  ? "border-violet-500 text-violet-600"
-                  : "border-transparent text-slate-400 hover:text-slate-600"
+                  ? "border-[var(--violet-500)] text-[var(--violet-600)]"
+                  : "border-transparent text-[var(--slate-400)] hover:text-[var(--slate-600)]"
               }`}
             >
               {tab === "nasil" ? "Nasıl Oynanır?" : tab === "ses" ? "Ses" : "Tema"}
@@ -87,9 +91,9 @@ export function SettingsModal({
           {/* Ses */}
           {activeTab === "ses" && (
             <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="flex items-center justify-between p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--card-border)]">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-violet-100 text-violet-600 rounded-lg">
+                  <div className="p-2 bg-[var(--violet-100)] text-[var(--violet-600)] rounded-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       {isSoundEnabled ? (
                         <>
@@ -107,17 +111,17 @@ export function SettingsModal({
                     </svg>
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-800 text-sm">Oyun Sesleri</p>
-                    <p className="text-xs text-slate-400 mt-0.5">Doğru/yanlış cevap efektleri</p>
+                    <p className="font-semibold text-[var(--text-primary)] text-sm">Oyun Sesleri</p>
+                    <p className="text-xs text-[var(--text-muted)] mt-0.5">Doğru/yanlış cevap efektleri</p>
                   </div>
                 </div>
                 <button
                   onClick={onSoundToggle}
-                  className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${isSoundEnabled ? "bg-violet-500" : "bg-slate-300"}`}
+                  className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${isSoundEnabled ? "bg-[var(--violet-500)]" : "bg-[var(--slate-300)]"}`}
                   role="switch"
                   aria-checked={isSoundEnabled}
                 >
-                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${isSoundEnabled ? "translate-x-6" : "translate-x-0"}`} />
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-[var(--bg-primary)] rounded-full shadow-sm transition-transform duration-200 ${isSoundEnabled ? "translate-x-6" : "translate-x-0"}`} />
                 </button>
               </div>
             </div>
@@ -127,22 +131,35 @@ export function SettingsModal({
           {activeTab === "tema" && (
             <div className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-3">
-                <button className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-violet-500 bg-violet-50 transition-all">
-                  <div className="w-full h-10 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center">
-                    <span className="text-xs font-bold text-slate-700">Aa</span>
+                <button 
+                  onClick={() => setTheme("light")}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                    theme === "light" 
+                      ? "border-violet-500 bg-[var(--violet-50)]" 
+                      : "border-[var(--slate-200)] bg-[var(--bg-secondary)] hover:border-[var(--violet-300)]"
+                  }`}
+                >
+                  <div className="w-full h-10 rounded-lg bg-[var(--slate-50)] border border-[var(--slate-200)] flex items-center justify-center">
+                    <span className="text-xs font-bold text-[var(--slate-700)]">Aa</span>
                   </div>
-                  <span className="text-xs font-semibold text-violet-700">Açık</span>
-                  <span className="w-2 h-2 rounded-full bg-violet-500"></span>
+                  <span className={`text-xs font-semibold ${theme === "light" ? "text-[var(--violet-700)]" : "text-[var(--text-secondary)]"}`}>Açık</span>
+                  {theme === "light" && <span className="w-2 h-2 rounded-full bg-[var(--violet-500)]"></span>}
                 </button>
-                <button className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-slate-200 bg-slate-50 opacity-50 cursor-not-allowed transition-all" disabled>
-                  <div className="w-full h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center">
-                    <span className="text-xs font-bold text-slate-200">Aa</span>
+                <button 
+                  onClick={() => setTheme("dark")}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                    theme === "dark" 
+                      ? "border-violet-500 bg-[var(--violet-50)]" 
+                      : "border-[var(--slate-200)] bg-[var(--bg-secondary)] hover:border-[var(--violet-300)]"
+                  }`}
+                >
+                  <div className="w-full h-10 rounded-lg bg-[var(--slate-800)] border border-[var(--slate-700)] flex items-center justify-center">
+                    <span className="text-xs font-bold text-[var(--slate-200)]">Aa</span>
                   </div>
-                  <span className="text-xs font-semibold text-slate-500">Koyu</span>
-                  <span className="text-[10px] text-slate-400">Yakında</span>
+                  <span className={`text-xs font-semibold ${theme === "dark" ? "text-[var(--violet-700)]" : "text-[var(--text-secondary)]"}`}>Koyu</span>
+                  {theme === "dark" && <span className="w-2 h-2 rounded-full bg-[var(--violet-500)]"></span>}
                 </button>
               </div>
-              <p className="text-xs text-slate-400 text-center">Koyu tema yakında kullanıma açılacak.</p>
             </div>
           )}
         </div>

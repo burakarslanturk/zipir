@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Nunito, Outfit } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next"
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -49,10 +50,13 @@ export default function RootLayout({
     <html
       lang="tr"
       className={`${nunito.variable} ${outfit.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col font-sans">
-        {children}
-        <Analytics />
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          {children}
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   );

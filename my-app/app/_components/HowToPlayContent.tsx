@@ -17,7 +17,7 @@ function RuleItem({ iconBg, iconColor, icon, children }: RuleItemProps) {
       <div className={`flex-shrink-0 ${iconBg} ${iconColor} p-2 rounded-xl`}>
         {icon}
       </div>
-      <p className="text-slate-600 text-sm leading-snug pt-0.5">{children}</p>
+      <p className="text-[var(--text-secondary)] text-sm leading-snug pt-0.5">{children}</p>
     </li>
   );
 }
@@ -31,8 +31,8 @@ export function HowToPlayContent() {
   return (
     <ul className="space-y-4">
       <RuleItem
-        iconBg="bg-violet-100"
-        iconColor="text-violet-600"
+        iconBg="bg-[var(--violet-100)]"
+        iconColor="text-[var(--violet-600)]"
         icon={
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10"/>
@@ -41,12 +41,12 @@ export function HowToPlayContent() {
           </svg>
         }
       >
-        <strong className="text-slate-800">14 Soru:</strong> 4 harfliden 10 harfliye kadar her harf grubundan 2&apos;şer soru sorulur.
+        <strong className="text-[var(--text-primary)]">14 Soru:</strong> 4 harfliden 10 harfliye kadar her harf grubundan 2&apos;şer soru sorulur.
       </RuleItem>
 
       <RuleItem
-        iconBg="bg-amber-100"
-        iconColor="text-amber-600"
+        iconBg="bg-[var(--amber-100)]"
+        iconColor="text-[var(--amber-600)]"
         icon={
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10"/>
@@ -54,12 +54,12 @@ export function HowToPlayContent() {
           </svg>
         }
       >
-        Tüm oyunu tamamlamak için <strong className="text-amber-600">toplam süreniz 4 dakikadır</strong>.
+        Tüm oyunu tamamlamak için <strong className="text-[var(--amber-600)]">toplam süreniz 4 dakikadır</strong>.
       </RuleItem>
 
       <RuleItem
-        iconBg="bg-blue-100"
-        iconColor="text-blue-600"
+        iconBg="bg-[var(--blue-100)]"
+        iconColor="text-[var(--blue-600)]"
         icon={
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"/>
@@ -68,12 +68,12 @@ export function HowToPlayContent() {
           </svg>
         }
       >
-        Her harfin puan değeri <strong className="text-blue-600">100&apos;dir</strong>. <strong className="text-slate-800">&quot;Harf Al&quot;</strong> butonuna bastıkça kelimeden alabileceğiniz toplam puandan <strong className="text-red-500">100 düşer</strong>.
+        Her harfin puan değeri <strong className="text-[var(--blue-600)]">100&apos;dir</strong>. <strong className="text-[var(--text-primary)]">&quot;Harf Al&quot;</strong> butonuna bastıkça kelimeden alabileceğiniz toplam puandan <strong className="text-[var(--red-500)]">100 düşer</strong>.
       </RuleItem>
 
       <RuleItem
-        iconBg="bg-emerald-100"
-        iconColor="text-emerald-600"
+        iconBg="bg-[var(--emerald-100)]"
+        iconColor="text-[var(--emerald-600)]"
         icon={
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect width="20" height="16" x="2" y="4" rx="2" ry="2"/>
@@ -88,12 +88,12 @@ export function HowToPlayContent() {
           </svg>
         }
       >
-        <strong className="text-slate-800">&quot;Cevapla&quot;</strong> dedikten sonra ana süre durur, <strong className="text-emerald-600">30 saniyelik cevaplama süreniz</strong> başlar.
+        <strong className="text-[var(--text-primary)]">&quot;Cevapla&quot;</strong> dedikten sonra ana süre durur, <strong className="text-[var(--emerald-600)]">30 saniyelik cevaplama süreniz</strong> başlar.
       </RuleItem>
 
       <RuleItem
-        iconBg="bg-red-100"
-        iconColor="text-red-600"
+        iconBg="bg-[var(--red-100)]"
+        iconColor="text-[var(--red-600)]"
         icon={
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10"/>
@@ -102,7 +102,7 @@ export function HowToPlayContent() {
           </svg>
         }
       >
-        <strong className="text-slate-800">Dikkat:</strong> Cevaplama süreniz biterse, o an alınabilecek puan <strong className="text-red-600">eksi puan (-)</strong> olarak hanenize yansır.
+        <strong className="text-[var(--text-primary)]">Dikkat:</strong> Cevaplama süreniz biterse, o an alınabilecek puan <strong className="text-[var(--red-600)]">eksi puan (-)</strong> olarak hanenize yansır.
       </RuleItem>
     </ul>
   );

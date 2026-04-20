@@ -561,13 +561,13 @@ export default function GamePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen w-full bg-slate-50 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen w-full bg-[var(--bg)] flex flex-col items-center justify-center p-4">
         <div className="flex flex-col items-center gap-6">
-          <h1 className="text-6xl sm:text-7xl font-nunito font-black text-violet-600 animate-pulse tracking-tight select-none">
-            ZIPIR<span className="text-violet-400 italic">!</span>
+          <h1 className="text-6xl sm:text-7xl font-nunito font-black text-[var(--violet-600)] animate-pulse tracking-tight select-none">
+            ZIPIR<span className="text-[var(--violet-400)] italic">!</span>
           </h1>
 
-          <p className="text-slate-400 font-medium text-base tracking-widest uppercase select-none">
+          <p className="text-[var(--slate-400)] font-medium text-base tracking-widest uppercase select-none">
             Yükleniyor...
           </p>
         </div>
@@ -577,9 +577,9 @@ export default function GamePage() {
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-3xl bg-white rounded-2xl shadow-sm p-6 sm:p-10 text-center border border-slate-100">
-          <h2 className="text-xl font-bold text-slate-800">
+      <div className="min-h-screen bg-[var(--bg)] flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-3xl bg-[var(--card)] rounded-2xl shadow-sm p-6 sm:p-10 text-center border border-[var(--card-border)]">
+          <h2 className="text-xl font-bold text-[var(--text-primary)]">
             Bugün için soru bulunamadı. Lütfen daha sonra tekrar deneyin.
           </h2>
         </div>
@@ -756,11 +756,11 @@ export default function GamePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
+    <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans text-[var(--text)]">
       
       {/* Kopyalandı Bildirimi */}
       {showToast && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white font-medium px-6 py-3 rounded-full shadow-lg z-50 animate-bounce">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-[var(--slate-800)] text-[var(--text-inverse)] font-medium px-6 py-3 rounded-full shadow-lg z-50 animate-bounce">
           ✓ Sonuç Panoya Kopyalandı!
         </div>
       )}
@@ -800,13 +800,13 @@ export default function GamePage() {
           {/* OYUN ANA EKRANI (Ana Tasarım) */}
           <div className="fixed top-0 left-0 w-full z-40 pt-2 sm:pt-4 flex justify-center pointer-events-none">
             <div className="w-full max-w-4xl px-4 flex justify-center">
-              <header className={`pointer-events-auto w-full bg-white/90 backdrop-blur-md shadow-md shadow-slate-200/50 border border-slate-200 rounded-2xl px-2 py-2 sm:px-3 flex items-center justify-between gap-1 sm:gap-4 transition-all duration-300 ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
+              <header className={`pointer-events-auto w-full bg-[var(--card)]/90 backdrop-blur-md shadow-md shadow-[var(--slate-200)]/50 border border-[var(--slate-200)] rounded-2xl px-2 py-2 sm:px-3 flex items-center justify-between gap-1 sm:gap-4 transition-all duration-300 ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
                 {/* Sol: Ayarlar Butonu */}
                 <div className="flex-1 flex justify-start shrink-0">
                   <button
                     onClick={() => setShowSettingsModal(true)}
                     aria-label="Ayarlar"
-                    className="p-2 rounded-xl text-slate-400 hover:text-violet-600 hover:bg-violet-50 active:scale-95 transition-all"
+                    className="p-2 rounded-xl text-[var(--slate-400)] hover:text-[var(--violet-600)] hover:bg-[var(--violet-50)] active:scale-95 transition-all"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
@@ -817,16 +817,16 @@ export default function GamePage() {
 
                 {/* Orta: Logo */}
                 <div className="flex justify-center shrink-1 px-1 sm:px-2">
-                  <h1 className="text-3xl sm:text-4xl font-nunito font-black tracking-tight text-violet-600 transition-transform origin-center">
-                    ZIPIR<span className="text-violet-400 italic">!</span>
+                  <h1 className="text-3xl sm:text-4xl font-nunito font-black tracking-tight text-[var(--violet-600)] transition-transform origin-center">
+                    ZIPIR<span className="text-[var(--violet-400)] italic">!</span>
                   </h1>
                 </div>
 
                 {/* Sağ: Puan */}
                 <div className="flex-1 flex justify-end shrink-0">
-                  <div className="flex items-center py-1.5 px-3 sm:py-2 sm:px-4 bg-violet-100/60 border border-violet-100 rounded-xl">
-                    <div className="text-sm sm:text-base font-semibold text-slate-600 flex items-center">
-                      Puan: <span className={`text-violet-700 font-bold text-base sm:text-xl ml-1 sm:ml-1.5 transition-transform duration-300 ${isScoreAnimating ? 'scale-[1.3]' : 'scale-100'}`}>{score}</span>
+                  <div className="flex items-center py-1.5 px-3 sm:py-2 sm:px-4 bg-[var(--violet-100)]/60 border border-[var(--violet-200)] rounded-xl">
+                    <div className="text-sm sm:text-base font-semibold text-[var(--slate-600)] flex items-center">
+                      Puan: <span className={`text-[var(--violet-700)] font-bold text-base sm:text-xl ml-1 sm:ml-1.5 transition-transform duration-300 ${isScoreAnimating ? 'scale-[1.3]' : 'scale-100'}`}>{score}</span>
                     </div>
                   </div>
                 </div>
@@ -835,29 +835,29 @@ export default function GamePage() {
           </div>
 
           <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pt-28 sm:pt-36 pb-20 ${isAnswering ? 'max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
-            <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 p-6 sm:p-10 flex flex-col items-center relative">
+            <div className="bg-[var(--card)] rounded-2xl shadow-xl shadow-[var(--slate-200)]/50 border border-[var(--slate-200)] p-6 sm:p-10 flex flex-col items-center relative">
               
               {/* Kart İçi Üst Bilgi Satırı: Soru Sayısı ve Süre */}
-              <div className="flex flex-wrap sm:flex-nowrap justify-between items-center w-full mb-6 pb-3 border-b border-slate-100 relative">
-                <div className="flex items-center gap-2 text-slate-600 font-medium">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+              <div className="flex flex-wrap sm:flex-nowrap justify-between items-center w-full mb-6 pb-3 border-b border-[var(--slate-100)] relative">
+                <div className="flex items-center gap-2 text-[var(--slate-600)] font-medium">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--slate-400)]">
                     <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                   </svg>
-                  <span>Soru: <strong className="text-slate-700 ml-1">{currentQuestionIndex + 1} / {questions.length}</strong></span>
+                  <span>Soru: <strong className="text-[var(--slate-700)] ml-1">{currentQuestionIndex + 1} / {questions.length}</strong></span>
                 </div>
                 
                 {/* 30 Saniyelik Cevaplama Süresi - Soru ve Ana Süre Arasında */}
                 {isAnswering && (
-                  <div className="w-full flex justify-center order-last mt-4 sm:w-auto sm:order-none sm:mt-0 sm:absolute sm:left-1/2 sm:-translate-x-1/2 bg-red-50 text-red-600 border border-red-200 px-3 py-1 rounded-full font-bold text-sm items-center gap-1.5 shadow-sm animate-pulse whitespace-nowrap">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
+                  <div className="w-full flex justify-center order-last mt-4 sm:w-auto sm:order-none sm:mt-0 sm:absolute sm:left-1/2 sm:-translate-x-1/2 bg-[var(--red-50)] text-[var(--red-600)] border border-[var(--red-200)] px-3 py-1 rounded-full font-bold text-sm items-center gap-1.5 shadow-sm animate-pulse whitespace-nowrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--red-500)]">
                       <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                     </svg>
                     <span>{answerTimeLeft} sn</span>
                   </div>
                 )}
                 
-                <div className={`flex items-center gap-2 font-mono text-lg sm:text-xl ${timeLeft <= 30 ? "text-red-500 font-bold animate-pulse scale-105 transition-transform" : "text-slate-700 font-bold"}`}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${timeLeft <= 30 ? "text-red-500" : "text-slate-400"}`}>
+                <div className={`flex items-center gap-2 font-mono text-lg sm:text-xl ${timeLeft <= 30 ? "text-[var(--red-500)] font-bold animate-pulse scale-105 transition-transform" : "text-[var(--slate-700)] font-bold"}`}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${timeLeft <= 30 ? "text-[var(--red-500)]" : "text-[var(--slate-400)]"}`}>
                     <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                   </svg>
                   <span className="w-14 text-right">{formatTime(timeLeft)}</span>
@@ -865,13 +865,13 @@ export default function GamePage() {
               </div>
               
               {/* Soru Değeri Etiketi */}
-              <div className="absolute -top-4 bg-violet-100 text-violet-700 border border-violet-200 text-xs font-bold px-4 py-1.5 rounded-full shadow-sm tracking-wide">
+              <div className="absolute -top-4 bg-[var(--violet-100)] text-[var(--violet-700)] border border-[var(--violet-200)] text-xs font-bold px-4 py-1.5 rounded-full shadow-sm tracking-wide">
                 Bu Sorunun Değeri: {currentPotentialScore} Puan
               </div>
 
               {/* Soru / İpucu Metni */}
               <div className="mt-8 mb-10 w-full text-center">
-                <h2 className="text-xl sm:text-2xl font-sans text-slate-700 leading-relaxed max-w-2xl mx-auto">
+                <h2 className="text-xl sm:text-2xl font-sans text-[var(--slate-700)] leading-relaxed max-w-2xl mx-auto">
                   {currentQuestion.clue}
                 </h2>
               </div>
@@ -906,17 +906,17 @@ export default function GamePage() {
                     }
 
                     // Stil Katmanları
-                    let boxStyle = "bg-slate-100 border-slate-300 text-transparent shadow-inner"; // Boş normal kutu
+                    let boxStyle = "bg-[var(--slate-100)] border-[var(--slate-300)] text-transparent shadow-inner"; // Boş normal kutu
                     if (answerStatus === "correct" && isRevealed) {
-                      boxStyle = "bg-emerald-50 border-emerald-500 border-b-4 text-emerald-700 shadow-md transform -translate-y-1 transition-all duration-300";
+                      boxStyle = "bg-[var(--emerald-50)] border-[var(--emerald-500)] border-b-4 text-[var(--emerald-700)] shadow-md transform -translate-y-1 transition-all duration-300";
                     } else if (answerStatus === "wrong" && !isRevealed) {
-                      boxStyle = "bg-red-50 border-red-500 text-red-800 shadow-md";
+                      boxStyle = "bg-[var(--red-50)] border-[var(--red-500)] text-[var(--red-600)] shadow-md";
                     } else if (isRevealed) {
-                      boxStyle = "bg-violet-100 border-violet-300 text-violet-800 font-black shadow-sm"; // Sistem İpucu Harfi
+                      boxStyle = "bg-[var(--violet-100)] border-[var(--violet-300)] text-[var(--violet-800)] font-black shadow-sm"; // Sistem İpucu Harfi
                     } else if (isUserTyped) {
-                      boxStyle = "bg-white border-violet-600 border-b-4 text-violet-900 font-black shadow-md transform -translate-y-1"; // Kullanıcı Girdisi
+                      boxStyle = "bg-[var(--card)] border-[var(--violet-600)] border-b-4 text-[var(--violet-900)] font-black shadow-md transform -translate-y-1"; // Kullanıcı Girdisi
                     } else if (isAnswering && isActiveBox) {
-                      boxStyle = "bg-violet-50/80 border-violet-500 shadow-inner ring-4 ring-violet-300/50"; // Odaklanılan
+                      boxStyle = "bg-[var(--violet-50)]/80 border-[var(--violet-500)] shadow-inner ring-4 ring-[var(--violet-300)]/50"; // Odaklanılan
                     }
 
                     const isManyLetters = currentQuestion.word.length > 8;
@@ -932,7 +932,7 @@ export default function GamePage() {
                         {displayChar}
                         {/* Aktif kutudayken küçük bir imleç işareti göster */}
                         {isAnswering && isActiveBox && (
-                          <div className="absolute w-5 h-1 bg-violet-400 bottom-2 rounded-full animate-pulse"></div>
+                          <div className="absolute w-5 h-1 bg-[var(--violet-400)] bottom-2 rounded-full animate-pulse"></div>
                         )}
                       </div>
                     );
@@ -946,7 +946,7 @@ export default function GamePage() {
                   <button 
                     onClick={handleGetLetter}
                     disabled={!isGameActive || revealedLetters.length === currentQuestion.word.length}
-                    className="w-full sm:w-auto flex flex-col items-center justify-center group px-8 py-3.5 rounded-xl border-2 border-violet-200 bg-violet-50 text-violet-600 hover:bg-violet-100 hover:border-violet-300 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto flex flex-col items-center justify-center group px-8 py-3.5 rounded-xl border-2 border-[var(--violet-200)] bg-[var(--violet-50)] text-[var(--violet-600)] hover:bg-[var(--violet-100)] hover:border-[var(--violet-300)] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span className="font-bold text-lg">Harf Al</span>
                     <span className="text-xs font-semibold opacity-70 mt-0.5 group-hover:opacity-100 flex items-center gap-1">
@@ -956,10 +956,10 @@ export default function GamePage() {
                   <button 
                     onClick={handleAnswerClick}
                     disabled={!isGameActive || revealedLetters.length === currentQuestion.word.length}
-                    className="w-full sm:w-auto flex flex-col items-center justify-center px-10 py-3.5 rounded-xl bg-violet-500 text-white shadow-md shadow-violet-200 hover:bg-violet-600 hover:shadow-lg hover:shadow-violet-300 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto flex flex-col items-center justify-center px-10 py-3.5 rounded-xl bg-[var(--violet-500)] text-[var(--text-inverse)] shadow-md shadow-[var(--violet-200)] hover:bg-[var(--violet-600)] hover:shadow-lg hover:shadow-[var(--violet-300)] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span className="font-bold text-lg">Cevapla</span>
-                    <span className="text-xs font-medium text-violet-100 mt-0.5">
+                    <span className="text-xs font-medium text-[var(--violet-100)] mt-0.5">
                       Tahmini Gir
                     </span>
                   </button>
@@ -988,7 +988,7 @@ export default function GamePage() {
                     
                     <button 
                       type="submit"
-                      className="px-12 py-3.5 bg-violet-600 text-white font-bold rounded-xl shadow-md hover:bg-violet-700 transition-all active:scale-95 text-lg max-sm:hidden"
+                      className="px-12 py-3.5 bg-[var(--violet-600)] text-[var(--text-inverse)] font-bold rounded-xl shadow-md hover:bg-[var(--violet-700)] transition-all active:scale-95 text-lg max-sm:hidden"
                     >
                       Gönder
                     </button>

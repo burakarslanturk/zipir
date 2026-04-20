@@ -53,10 +53,10 @@ export function NextGameTimer() {
 
   return (
     <div className="flex flex-col items-center sm:items-start">
-      <p className="text-xs font-semibold text-slate-400 mb-0.5 tracking-wider uppercase">
+      <p className="text-xs font-semibold text-[var(--text-muted)] mb-0.5 tracking-wider uppercase">
         Yeni Oyuna Kalan
       </p>
-      <div className="text-xl sm:text-2xl font-bold text-violet-600 font-mono tracking-tight">
+      <div className="text-xl sm:text-2xl font-bold text-[var(--violet-600)] font-mono tracking-tight">
         {timeLeftStr}
       </div>
     </div>
