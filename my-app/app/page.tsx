@@ -744,7 +744,7 @@ export default function GamePage() {
     const formattedDate = `${today.getDate().toString().padStart(2, "0")}.${(today.getMonth() + 1).toString().padStart(2, "0")}.${today.getFullYear()}`;
     const playUrl = window.location.origin;
 
-    const shareText = `ZIPIR! - Kelime oyunu\n\n${formattedDate}\nPuan: ${score}\nArtan Süre: ${timeLeft} sn\n\n${playUrl}`;
+    const shareText = `ZIPIR! - Kelime oyunu\n\n📅 ${formattedDate}\n🏆 Puan: ${score}\n⏱️ Artan Süre: ${timeLeft} sn\n\n${playUrl}`;
 
     try {
       await navigator.clipboard.writeText(shareText);
