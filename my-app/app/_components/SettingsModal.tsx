@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { useTheme } from "next-themes";
-import { SettingsTab } from "../../types";
-import { HowToPlayContent } from "./HowToPlayContent";
 
 /**
  * Ayarlar modalı bileşeni için props.
@@ -13,8 +11,6 @@ interface SettingsModalProps {
   isOpen: boolean;
   /** Modal kapatıldığında çağrılır */
   onClose: () => void;
-  /** Başlangıçta aktif sekme (varsayılan: "nasil") */
-  initialTab?: SettingsTab;
   /** Ses efektleri açık mı? */
   isSoundEnabled: boolean;
   /** Ses toggle değiştiğinde çağrılır */
@@ -23,18 +19,16 @@ interface SettingsModalProps {
 
 /**
  * Oyun ayarlarının gösterildiği modal bileşeni.
- * 3 sekme içerir: Nasıl Oynanır?, Ses, Tema.
- * Giriş ekranı ve oyun ekranında ortak olarak kullanılır.
+ * Minimal liste yapısı: Nasıl Oynanır?, Koyu tema, Ses efektleri, Bize ulaşın.
  */
 export function SettingsModal({ 
   isOpen, 
   onClose, 
-  initialTab = "nasil",
   isSoundEnabled, 
   onSoundToggle 
 }: SettingsModalProps) {
-  // Aktif sekme state'i
-  const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
+  // Accordion state'leri
+  const [isContactOpen, setIsContactOpen] = useState(false);
   
   // Tema hook'u
   const { theme, setTheme } = useTheme();
@@ -66,102 +60,103 @@ export function SettingsModal({
           </button>
         </div>
 
-        {/* Sekme Başlıkları */}
-        <div className="flex border-b border-[var(--card-border)] px-6">
-          {(["nasil", "ses", "tema"] as const).map((tab) => (
+        {/* İçerik */}
+        <div className="py-2">
+          
+          {/* Ayarlar Listesi */}
+          <div className="divide-y divide-[var(--card-border)]">
+            
+            {/* Koyu Tema Toggle */}
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`py-3 px-4 text-sm font-semibold border-b-2 transition-colors -mb-px ${
-                activeTab === tab
-                  ? "border-[var(--violet-500)] text-[var(--violet-600)]"
-                  : "border-transparent text-[var(--slate-400)] hover:text-[var(--slate-600)]"
-              }`}
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="w-full flex items-center justify-between px-6 py-4 hover:bg-[var(--slate-50)] transition-colors"
             >
-              {tab === "nasil" ? "Nasıl Oynanır?" : tab === "ses" ? "Ses" : "Tema"}
+              <div className="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--slate-400)]">
+                  <circle cx="12" cy="12" r="5"/>
+                  <path d="M12 1v2"/>
+                  <path d="M12 21v2"/>
+                  <path d="M4.22 4.22l1.42 1.42"/>
+                  <path d="M18.36 18.36l1.42 1.42"/>
+                  <path d="M1 12h2"/>
+                  <path d="M21 12h2"/>
+                  <path d="M4.22 19.78l1.42-1.42"/>
+                  <path d="M18.36 5.64l1.42-1.42"/>
+                </svg>
+                <span className="text-[var(--text-primary)]">Koyu tema</span>
+              </div>
+              <div
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${theme === "dark" ? "bg-[var(--violet-500)]" : "bg-[var(--slate-300)]"}`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${theme === "dark" ? "translate-x-5" : "translate-x-0"}`} />
+              </div>
             </button>
-          ))}
-        </div>
 
-        {/* Sekme İçerikleri */}
-        <div className="p-6">
-          {/* Nasıl Oynanır? */}
-          {activeTab === "nasil" && <HowToPlayContent />}
+            {/* Ses Efektleri Toggle */}
+            <button
+              onClick={onSoundToggle}
+              className="w-full flex items-center justify-between px-6 py-4 hover:bg-[var(--slate-50)] transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--slate-400)]">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                </svg>
+                <span className="text-[var(--text-primary)]">Ses efektleri</span>
+              </div>
+              <div
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isSoundEnabled ? "bg-[var(--violet-500)]" : "bg-[var(--slate-300)]"}`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${isSoundEnabled ? "translate-x-5" : "translate-x-0"}`} />
+              </div>
+            </button>
 
-          {/* Ses */}
-          {activeTab === "ses" && (
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--card-border)]">
+            {/* Bize Ulaşın - Accordion */}
+            <div className="overflow-hidden">
+              <button
+                onClick={() => setIsContactOpen(!isContactOpen)}
+                className="w-full flex items-center justify-between px-6 py-4 hover:bg-[var(--slate-50)] transition-colors"
+              >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-[var(--violet-100)] text-[var(--violet-600)] rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      {isSoundEnabled ? (
-                        <>
-                          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-                        </>
-                      ) : (
-                        <>
-                          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                          <line x1="23" y1="9" x2="17" y2="15"/>
-                          <line x1="17" y1="9" x2="23" y2="15"/>
-                        </>
-                      )}
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-[var(--text-primary)] text-sm">Oyun Sesleri</p>
-                    <p className="text-xs text-[var(--text-muted)] mt-0.5">Doğru/yanlış cevap efektleri</p>
-                  </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--slate-400)]">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                  <span className="text-[var(--text-primary)]">Bize ulaşın</span>
                 </div>
-                <button
-                  onClick={onSoundToggle}
-                  className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${isSoundEnabled ? "bg-[var(--violet-500)]" : "bg-[var(--slate-300)]"}`}
-                  role="switch"
-                  aria-checked={isSoundEnabled}
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="18" 
+                  height="18" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className={`text-[var(--slate-400)] transition-transform duration-200 ${isContactOpen ? "rotate-90" : ""}`}
                 >
-                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-[var(--bg-primary)] rounded-full shadow-sm transition-transform duration-200 ${isSoundEnabled ? "translate-x-6" : "translate-x-0"}`} />
-                </button>
-              </div>
+                  <polyline points="9 18 15 12 9 6"/>
+                </svg>
+              </button>
+              {isContactOpen && (
+                <div className="px-6 pt-3 pb-5 border-t border-[var(--card-border)]">
+                  <p className="text-[var(--text-secondary)] text-sm mb-3 pt-1">
+                    Sorularınız, önerileriniz veya geri bildirimleriniz için bize ulaşabilirsiniz.
+                  </p>
+                  <a
+                    href="mailto:iletisim@zipir.com"
+                    className="flex items-center gap-2 p-3 rounded-xl bg-[var(--blue-50)] text-[var(--blue-600)] hover:bg-[var(--blue-100)] transition-colors text-sm"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect width="20" height="16" x="2" y="4" rx="2"/>
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    </svg>
+                    <span className="font-medium">iletisim@zipir.com</span>
+                  </a>
+                </div>
+              )}
             </div>
-          )}
 
-          {/* Tema */}
-          {activeTab === "tema" && (
-            <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-3">
-                <button 
-                  onClick={() => setTheme("light")}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                    theme === "light" 
-                      ? "border-violet-500 bg-[var(--violet-50)]" 
-                      : "border-[var(--slate-200)] bg-[var(--bg-secondary)] hover:border-[var(--violet-300)]"
-                  }`}
-                >
-                  <div className="w-full h-10 rounded-lg bg-[var(--slate-50)] border border-[var(--slate-200)] flex items-center justify-center">
-                    <span className="text-xs font-bold text-[var(--slate-700)]">Aa</span>
-                  </div>
-                  <span className={`text-xs font-semibold ${theme === "light" ? "text-[var(--violet-700)]" : "text-[var(--text-secondary)]"}`}>Açık</span>
-                  {theme === "light" && <span className="w-2 h-2 rounded-full bg-[var(--violet-500)]"></span>}
-                </button>
-                <button 
-                  onClick={() => setTheme("dark")}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                    theme === "dark" 
-                      ? "border-violet-500 bg-[var(--violet-50)]" 
-                      : "border-[var(--slate-200)] bg-[var(--bg-secondary)] hover:border-[var(--violet-300)]"
-                  }`}
-                >
-                  <div className="w-full h-10 rounded-lg bg-[var(--slate-800)] border border-[var(--slate-700)] flex items-center justify-center">
-                    <span className="text-xs font-bold text-[var(--slate-200)]">Aa</span>
-                  </div>
-                  <span className={`text-xs font-semibold ${theme === "dark" ? "text-[var(--violet-700)]" : "text-[var(--text-secondary)]"}`}>Koyu</span>
-                  {theme === "dark" && <span className="w-2 h-2 rounded-full bg-[var(--violet-500)]"></span>}
-                </button>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

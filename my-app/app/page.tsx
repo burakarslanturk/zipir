@@ -618,7 +618,6 @@ export default function GamePage() {
         <SettingsModal
           isOpen={showSettingsModal}
           onClose={() => setShowSettingsModal(false)}
-          initialTab={settingsTab}
           isSoundEnabled={isSoundEnabled}
           onSoundToggle={() => setIsSoundEnabled((p) => !p)}
         />
@@ -804,7 +803,6 @@ export default function GamePage() {
           <SettingsModal
             isOpen={showSettingsModal}
             onClose={() => setShowSettingsModal(false)}
-            initialTab={settingsTab}
             isSoundEnabled={isSoundEnabled}
             onSoundToggle={() => setIsSoundEnabled((p) => !p)}
           />
