@@ -780,7 +780,7 @@ export default function GamePage() {
   };
 
   return (
-    <div className="h-dvh w-screen overflow-hidden bg-[var(--bg)] flex flex-col font-sans text-[var(--text)] fixed inset-0 touch-none overscroll-none">
+    <div className="h-dvh w-screen overflow-hidden bg-[var(--bg)] flex flex-col font-sans text-[var(--text)] fixed inset-0 touch-manipulation overscroll-none">
       
       {/* Kopyalandı Bildirimi */}
       {showToast && (
@@ -860,7 +860,7 @@ export default function GamePage() {
           </div>
 
           <main 
-            className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pt-28 sm:pt-36 pb-20 ${isAnswering ? 'max-sm:pt-20 max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''} touch-none transition-all duration-300`}
+            className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pt-28 sm:pt-36 pb-20 ${isAnswering ? 'max-sm:pt-20 max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''} touch-manipulation transition-all duration-300`}
             style={{
               transform: isAnswering && keyboardHeight > 0 ? `translateY(-${Math.min(keyboardHeight * 0.2, 60)}px)` : undefined,
               transition: 'transform 0.3s ease-out'

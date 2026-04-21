@@ -52,8 +52,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 2,        // Max 2x zoom (pinch)
+  userScalable: true,     // Zoom'a izin ver (sadece pinch)
   viewportFit: "cover",
 };
 
@@ -73,7 +73,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#7c3aed" />
         <link rel="apple-touch-icon" href="/icon.png" />
       </head>
-      <body className="h-dvh overflow-hidden fixed inset-0 touch-none overscroll-none font-sans">
+      <body className="h-dvh overflow-hidden fixed inset-0 touch-manipulation overscroll-none font-sans">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}
           <Analytics />

@@ -194,6 +194,6 @@ body {
   html, body {
     overscroll-behavior: none;
     -webkit-overflow-scrolling: auto;
-    touch-action: none;
+    touch-action: manipulation;  /* Çift tık zoom'u engelle, pinch'e izin ver */
   }
 }
