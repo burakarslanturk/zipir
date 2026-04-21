@@ -103,13 +103,38 @@ export default function GamePage() {
   const suresonuAudioRef = useRef<HTMLAudioElement | null>(null);
   /** Mobil cihaz kontrolü (sanal klavye gösterimi için) */
   const [isMobile, setIsMobile] = useState(false);
+  /** Sanal klavye yüksekliği (visual viewport hesaplaması) */
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
-    handleResize(); // set initial value
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Visual Viewport API - sanal klavye açıldığında görünür alanı hesapla
+  useEffect(() => {
+    if (!isMobile || typeof window === 'undefined' || !window.visualViewport) return;
+
+    const handleVisualViewportChange = () => {
+      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      const windowHeight = window.innerHeight;
+      const keyboardH = Math.max(0, windowHeight - viewportHeight);
+      setKeyboardHeight(keyboardH > 100 ? keyboardH : 0); // 100px'den azsa klavye yok say
+    };
+
+    window.visualViewport.addEventListener('resize', handleVisualViewportChange);
+    window.visualViewport.addEventListener('scroll', handleVisualViewportChange);
+    
+    // İlk değer
+    handleVisualViewportChange();
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', handleVisualViewportChange);
+      window.visualViewport?.removeEventListener('scroll', handleVisualViewportChange);
+    };
+  }, [isMobile]);
 
   // bfcache'den geri yükleme veya sekme ertesi gün açılırsa sayfayı yenile
   useEffect(() => {
@@ -834,7 +859,13 @@ export default function GamePage() {
             </div>
           </div>
 
-          <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pt-28 sm:pt-36 pb-20 ${isAnswering ? 'max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''} touch-none`}>
+          <main 
+            className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pt-28 sm:pt-36 pb-20 ${isAnswering ? 'max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''} touch-none`}
+            style={{
+              transform: isAnswering && keyboardHeight > 0 ? `translateY(-${Math.min(keyboardHeight * 0.5, 120)}px)` : undefined,
+              transition: 'transform 0.3s ease-out'
+            }}
+          >
             <div className="bg-[var(--card)] rounded-2xl shadow-xl shadow-[var(--slate-200)]/50 border border-[var(--slate-200)] p-6 sm:p-10 flex flex-col items-center relative">
               
               {/* Kart İçi Üst Bilgi Satırı: Soru Sayısı ve Süre */}
