@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Nunito, Outfit } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "next-themes";
@@ -43,11 +43,18 @@ export const metadata: Metadata = {
     description: "Her gün 14 yeni soru, 4 dakika. Bugün hiç harf almadan tamamlayabilecek misin? Haydi arkadaşlarına meydan oku!",
     images: ["/og-image.jpg"],
   },
-  themeColor: "#7c3aed",
   robots: {
     index: true,
     follow: true,
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -66,7 +73,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#7c3aed" />
         <link rel="apple-touch-icon" href="/icon.png" />
       </head>
-      <body className="min-h-full flex flex-col font-sans">
+      <body className="h-dvh overflow-hidden fixed inset-0 touch-none overscroll-none font-sans">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}
           <Analytics />

@@ -189,3 +189,11 @@ body {
 .animate-countdown-ripple {
   animation: countdown-ripple 0.7s ease-out forwards;
 }
+
+@layer base {
+  html, body {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: auto;
+    touch-action: none;
+  }
+}

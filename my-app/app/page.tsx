@@ -561,7 +561,7 @@ export default function GamePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen w-full bg-[var(--bg)] flex flex-col items-center justify-center p-4">
+      <div className="h-dvh w-screen overflow-hidden bg-[var(--bg)] flex flex-col items-center justify-center p-4 fixed inset-0">
         <div className="flex flex-col items-center gap-6">
           <h1 className="text-6xl sm:text-7xl font-nunito font-black text-[var(--violet-600)] animate-pulse tracking-tight select-none">
             ZIPIR<span className="text-[var(--violet-400)] italic">!</span>
@@ -577,7 +577,7 @@ export default function GamePage() {
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-[var(--bg)] flex flex-col items-center justify-center p-4">
+      <div className="h-dvh w-screen overflow-hidden bg-[var(--bg)] flex flex-col items-center justify-center p-4 fixed inset-0">
         <div className="w-full max-w-3xl bg-[var(--card)] rounded-2xl shadow-sm p-6 sm:p-10 text-center border border-[var(--card-border)]">
           <h2 className="text-xl font-bold text-[var(--text-primary)]">
             Bugün için soru bulunamadı. Lütfen daha sonra tekrar deneyin.
@@ -756,7 +756,7 @@ export default function GamePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] flex flex-col font-sans text-[var(--text)]">
+    <div className="h-dvh w-screen overflow-hidden bg-[var(--bg)] flex flex-col font-sans text-[var(--text)] fixed inset-0 touch-none overscroll-none">
       
       {/* Kopyalandı Bildirimi */}
       {showToast && (
@@ -834,7 +834,7 @@ export default function GamePage() {
             </div>
           </div>
 
-          <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pt-28 sm:pt-36 pb-20 ${isAnswering ? 'max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
+          <main className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pt-28 sm:pt-36 pb-20 ${isAnswering ? 'max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''} touch-none`}>
             <div className="bg-[var(--card)] rounded-2xl shadow-xl shadow-[var(--slate-200)]/50 border border-[var(--slate-200)] p-6 sm:p-10 flex flex-col items-center relative">
               
               {/* Kart İçi Üst Bilgi Satırı: Soru Sayısı ve Süre */}
