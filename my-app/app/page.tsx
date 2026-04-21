@@ -983,6 +983,13 @@ export default function GamePage() {
                         const filtered = val.replace(/[^a-zA-ZçğıöşüÇĞİÖŞÜ]/g, '');
                         setUserAnswer(filtered.toLocaleUpperCase('tr-TR'));
                       }}
+                      onBlur={() => {
+                        if (isAnswering && !isMobile) {
+                          setTimeout(() => {
+                            document.getElementById('hidden-answer-input')?.focus();
+                          }, 0);
+                        }
+                      }}
                       className="absolute opacity-0 w-0 h-0 -z-10 focus:outline-none cursor-default max-sm:hidden"
                     />
                     
