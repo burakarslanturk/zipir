@@ -822,8 +822,10 @@ export default function GamePage() {
             />
           )}
 
-          {/* OYUN ANA EKRANI (Ana Tasarım) */}
-          <div className="fixed top-0 left-0 w-full z-40 pt-2 sm:pt-4 flex justify-center pointer-events-none">
+          {/* OYUN ANA EKRANI (Ana Tasarım) - Mobil cevaplarken header gizlenir */}
+          <div 
+            className={`fixed top-0 left-0 w-full z-40 pt-2 sm:pt-4 flex justify-center pointer-events-none transition-all duration-300 ${isAnswering ? 'max-sm:opacity-0 max-sm:-translate-y-full max-sm:pointer-events-none' : 'max-sm:opacity-100 max-sm:translate-y-0'}`}
+          >
             <div className="w-full max-w-4xl px-4 flex justify-center">
               <header className={`pointer-events-auto w-full bg-[var(--card)]/90 backdrop-blur-md shadow-md shadow-[var(--slate-200)]/50 border border-[var(--slate-200)] rounded-2xl px-2 py-2 sm:px-3 flex items-center justify-between gap-1 sm:gap-4 transition-all duration-300 ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
                 {/* Sol: Ayarlar Butonu */}
@@ -860,9 +862,9 @@ export default function GamePage() {
           </div>
 
           <main 
-            className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pt-28 sm:pt-36 pb-20 ${isAnswering ? 'max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''} touch-none`}
+            className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pt-28 sm:pt-36 pb-20 ${isAnswering ? 'max-sm:pt-20 max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''} touch-none transition-all duration-300`}
             style={{
-              transform: isAnswering && keyboardHeight > 0 ? `translateY(-${Math.min(keyboardHeight * 0.5, 120)}px)` : undefined,
+              transform: isAnswering && keyboardHeight > 0 ? `translateY(-${Math.min(keyboardHeight * 0.2, 60)}px)` : undefined,
               transition: 'transform 0.3s ease-out'
             }}
           >
