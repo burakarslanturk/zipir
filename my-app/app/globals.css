@@ -192,10 +192,8 @@ body {
 
 @layer base {
   html, body {
-    overscroll-behavior-y: none;
-  }
-  
-  body {
-    overflow-y: auto;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: auto;
+    touch-action: none;
   }
 }
