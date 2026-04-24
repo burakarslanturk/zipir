@@ -87,10 +87,10 @@ export function StartScreen({
 
         <button
           onClick={onStart}
-          className="w-full max-w-xs px-8 py-5 bg-[var(--violet-600)] hover:bg-[var(--violet-700)] text-[var(--text-inverse)] text-xl font-bold rounded-2xl shadow-lg shadow-[var(--violet-200)] hover:shadow-xl hover:shadow-[var(--violet-300)] transition-all active:scale-95 flex items-center justify-center gap-3"
+          className="w-full max-w-[280px] sm:max-w-xs px-6 py-4 sm:px-8 sm:py-5 bg-[var(--violet-600)] hover:bg-[var(--violet-700)] text-[var(--text-inverse)] text-lg sm:text-xl font-bold rounded-2xl shadow-lg shadow-[var(--violet-200)] hover:shadow-xl hover:shadow-[var(--violet-300)] transition-all active:scale-95 flex items-center justify-center gap-2 sm:gap-3"
         >
           <span>Oyuna Başla</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="sm:w-[22px] sm:h-[22px]">
             <path d="M5 12h14"/>
             <path d="m12 5 7 7-7 7"/>
           </svg>
@@ -98,9 +98,9 @@ export function StartScreen({
 
         <button
           onClick={onShowHowToPlay}
-          className="mt-4 w-full max-w-xs px-8 py-3.5 bg-[var(--card)] hover:bg-[var(--bg-secondary)] text-[var(--slate-600)] hover:text-[var(--violet-600)] text-base font-semibold rounded-2xl border border-[var(--slate-200)] hover:border-[var(--violet-200)] shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2"
+          className="mt-3 sm:mt-4 w-full max-w-[280px] sm:max-w-xs px-6 py-3 sm:px-8 sm:py-3.5 bg-[var(--card)] hover:bg-[var(--bg-secondary)] text-[var(--slate-600)] hover:text-[var(--violet-600)] text-sm sm:text-base font-semibold rounded-2xl border border-[var(--slate-200)] hover:border-[var(--violet-200)] shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="sm:w-[18px] sm:h-[18px]">
             <circle cx="12" cy="12" r="10"/>
             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
             <line x1="12" y1="17" x2="12.01" y2="17"/>
