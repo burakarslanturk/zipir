@@ -107,6 +107,8 @@ export default function GamePage() {
   const [isMobile, setIsMobile] = useState(false);
   /** Sanal klavye yüksekliği (visual viewport hesaplaması) */
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  /** Orijinal viewport yüksekliği (Android vs iOS tespiti için) */
+  const originalWindowHeightRef = useRef<number>(0);
 
   // Native klavye ayarını localStorage'dan yükle
   useEffect(() => {
@@ -128,21 +130,36 @@ export default function GamePage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Visual Viewport API - sanal klavye açıldığında görünür alanı hesapla
+  // Visual Viewport API - sadece iOS'ta klavye yüksekliği hesapla (Android'de viewport zaten daralır)
   useEffect(() => {
     if (!isMobile || typeof window === 'undefined' || !window.visualViewport) return;
 
+    // Orijinal yüksekliği kaydet (sayfa yüklenince bir kere)
+    if (originalWindowHeightRef.current === 0) {
+      originalWindowHeightRef.current = window.innerHeight;
+    }
+
     const handleVisualViewportChange = () => {
       const viewportHeight = window.visualViewport?.height || window.innerHeight;
-      const windowHeight = window.innerHeight;
-      const keyboardH = Math.max(0, windowHeight - viewportHeight);
-      setKeyboardHeight(keyboardH > 100 ? keyboardH : 0); // 100px'den azsa klavye yok say
+      const currentWindowHeight = window.innerHeight;
+      const originalHeight = originalWindowHeightRef.current;
+
+      // Android: window.innerHeight daralır, iOS: sabit kalır
+      const isWindowHeightShrunk = originalHeight > 0 && currentWindowHeight < originalHeight * 0.9;
+
+      if (isWindowHeightShrunk) {
+        // Android: viewport zaten daraldı, ekstra transform UYGULAMA
+        setKeyboardHeight(0);
+      } else {
+        // iOS: window.innerHeight sabit, sadece visualViewport daraldı
+        const keyboardH = Math.max(0, originalHeight - viewportHeight);
+        setKeyboardHeight(keyboardH > 100 ? keyboardH : 0);
+      }
     };
 
     window.visualViewport.addEventListener('resize', handleVisualViewportChange);
     window.visualViewport.addEventListener('scroll', handleVisualViewportChange);
     
-    // İlk değer
     handleVisualViewportChange();
 
     return () => {
@@ -682,6 +699,15 @@ export default function GamePage() {
     setAnswerStartTime(Date.now());
     setAnswerTimeLeft(30);
     // Native klavye modunda input zaten autoFocus ile odaklanacak
+    // Klavye açıldığında harf kutularının görünür kalmasını sağla (Android için)
+    if (useNativeKeyboard) {
+      setTimeout(() => {
+        const letterBoxes = document.querySelector('[data-letter-boxes]');
+        if (letterBoxes) {
+          letterBoxes.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300);
+    }
   };
 
   // Cevabı Gönderme
@@ -929,6 +955,7 @@ export default function GamePage() {
 
               {/* Harf Kutuları */}
               <div 
+                data-letter-boxes
                 className={`flex flex-row flex-nowrap justify-center items-center w-full gap-${currentQuestion.word.length > 8 ? '1' : '2'} sm:gap-2 mb-10 cursor-text px-1 ${isShaking || answerStatus === "wrong" ? "animate-shake" : ""}`}
                 onClick={() => {
                   if (isAnswering && (useNativeKeyboard || !isMobile)) document.getElementById('hidden-answer-input')?.focus();
