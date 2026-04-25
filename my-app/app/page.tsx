@@ -681,12 +681,7 @@ export default function GamePage() {
     setIsAnswering(true);
     setAnswerStartTime(Date.now());
     setAnswerTimeLeft(30);
-    // Native klavye modunda otomatik odaklan
-    if (useNativeKeyboard) {
-      setTimeout(() => {
-        document.getElementById('hidden-answer-input')?.focus();
-      }, 100);
-    }
+    // Native klavye modunda input zaten autoFocus ile odaklanacak
   };
 
   // Cevabı Gönderme
@@ -936,7 +931,7 @@ export default function GamePage() {
               <div 
                 className={`flex flex-row flex-nowrap justify-center items-center w-full gap-${currentQuestion.word.length > 8 ? '1' : '2'} sm:gap-2 mb-10 cursor-text px-1 ${isShaking || answerStatus === "wrong" ? "animate-shake" : ""}`}
                 onClick={() => {
-                  if (isAnswering && !isMobile) document.getElementById('hidden-answer-input')?.focus();
+                  if (isAnswering && (useNativeKeyboard || !isMobile)) document.getElementById('hidden-answer-input')?.focus();
                 }}
               >
                 {(() => {
@@ -1027,7 +1022,7 @@ export default function GamePage() {
                     <input
                       id="hidden-answer-input"
                       type="text"
-                      autoFocus={!isMobile && !useNativeKeyboard}
+                      autoFocus={useNativeKeyboard || !isMobile}
                       autoComplete="off"
                       autoCorrect="off"
                       spellCheck="false"
@@ -1048,7 +1043,7 @@ export default function GamePage() {
                           }, 0);
                         }
                       }}
-                      className={`absolute focus:outline-none cursor-default ${useNativeKeyboard ? 'opacity-0 w-[1px] h-[1px] -z-10 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2' : 'opacity-0 w-0 h-0 -z-10 max-sm:hidden'}`}
+                      className={`absolute focus:outline-none cursor-text ${useNativeKeyboard ? 'opacity-0 w-[1px] h-[1px] -z-10' : 'opacity-0 w-0 h-0 -z-10 max-sm:hidden'}`}
                     />
                     
                     <button 
