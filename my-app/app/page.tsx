@@ -89,6 +89,8 @@ export default function GamePage() {
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   /** Nasıl Oynanır modalı açık mı? (giriş ekranında) */
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+  /** Sistem (native) klavye kullanılsın mı? (false = sanal klavye) */
+  const [useNativeKeyboard, setUseNativeKeyboard] = useState(false);
 
   // ==========================================
   // REF'LER
@@ -105,6 +107,19 @@ export default function GamePage() {
   const [isMobile, setIsMobile] = useState(false);
   /** Sanal klavye yüksekliği (visual viewport hesaplaması) */
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  // Native klavye ayarını localStorage'dan yükle
+  useEffect(() => {
+    const saved = localStorage.getItem("zipir_native_keyboard");
+    if (saved !== null) {
+      setUseNativeKeyboard(saved === "true");
+    }
+  }, []);
+
+  // Native klavye ayarını localStorage'a kaydet
+  useEffect(() => {
+    localStorage.setItem("zipir_native_keyboard", useNativeKeyboard.toString());
+  }, [useNativeKeyboard]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 640);
@@ -620,6 +635,8 @@ export default function GamePage() {
           onClose={() => setShowSettingsModal(false)}
           isSoundEnabled={isSoundEnabled}
           onSoundToggle={() => setIsSoundEnabled((p) => !p)}
+          useNativeKeyboard={useNativeKeyboard}
+          onNativeKeyboardToggle={() => setUseNativeKeyboard((p) => !p)}
         />
         <StartScreen
           onStart={() => setCountdown(3)}
@@ -664,6 +681,12 @@ export default function GamePage() {
     setIsAnswering(true);
     setAnswerStartTime(Date.now());
     setAnswerTimeLeft(30);
+    // Native klavye modunda otomatik odaklan
+    if (useNativeKeyboard) {
+      setTimeout(() => {
+        document.getElementById('hidden-answer-input')?.focus();
+      }, 100);
+    }
   };
 
   // Cevabı Gönderme
@@ -805,6 +828,8 @@ export default function GamePage() {
             onClose={() => setShowSettingsModal(false)}
             isSoundEnabled={isSoundEnabled}
             onSoundToggle={() => setIsSoundEnabled((p) => !p)}
+            useNativeKeyboard={useNativeKeyboard}
+            onNativeKeyboardToggle={() => setUseNativeKeyboard((p) => !p)}
           />
 
           {showGameOverModal && (
@@ -1002,10 +1027,12 @@ export default function GamePage() {
                     <input
                       id="hidden-answer-input"
                       type="text"
-                      autoFocus={!isMobile}
+                      autoFocus={!isMobile && !useNativeKeyboard}
                       autoComplete="off"
                       autoCorrect="off"
                       spellCheck="false"
+                      inputMode="text"
+                      enterKeyHint="done"
                       value={userAnswer}
                       maxLength={currentQuestion.word.length - revealedLetters.length} // Yalnızca boş kutu kadar karakter alır
                       onChange={(e) => {
@@ -1015,13 +1042,13 @@ export default function GamePage() {
                         setUserAnswer(filtered.toLocaleUpperCase('tr-TR'));
                       }}
                       onBlur={() => {
-                        if (isAnswering && !isMobile) {
+                        if (isAnswering && (!isMobile || useNativeKeyboard)) {
                           setTimeout(() => {
                             document.getElementById('hidden-answer-input')?.focus();
                           }, 0);
                         }
                       }}
-                      className="absolute opacity-0 w-0 h-0 -z-10 focus:outline-none cursor-default max-sm:hidden"
+                      className={`absolute focus:outline-none cursor-default ${useNativeKeyboard ? 'opacity-0 w-[1px] h-[1px] -z-10 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2' : 'opacity-0 w-0 h-0 -z-10 max-sm:hidden'}`}
                     />
                     
                     <button 
@@ -1036,8 +1063,8 @@ export default function GamePage() {
             </div>
           </main>
 
-          {/* Sanal Klavye - Sadece mobil cihazlarda ve cevaplama aşamasındayken gösterilir */}
-          {isAnswering && isMobile && (
+          {/* Sanal Klavye - Sadece mobilde, native klavye kapalıyken ve cevaplama aşamasındayken gösterilir */}
+          {isAnswering && isMobile && !useNativeKeyboard && (
             <VirtualKeyboard 
               onKeyPress={handleVirtualKeyPress}
               onBackspace={handleVirtualBackspace}

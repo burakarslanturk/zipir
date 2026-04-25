@@ -15,6 +15,10 @@ interface SettingsModalProps {
   isSoundEnabled: boolean;
   /** Ses toggle değiştiğinde çağrılır */
   onSoundToggle: () => void;
+  /** Sistem (native) klavye kullanılsın mı? */
+  useNativeKeyboard: boolean;
+  /** Klavye toggle değiştiğinde çağrılır */
+  onNativeKeyboardToggle: () => void;
 }
 
 /**
@@ -25,7 +29,9 @@ export function SettingsModal({
   isOpen, 
   onClose, 
   isSoundEnabled, 
-  onSoundToggle 
+  onSoundToggle,
+  useNativeKeyboard,
+  onNativeKeyboardToggle
 }: SettingsModalProps) {
   // Accordion state'leri
   const [isContactOpen, setIsContactOpen] = useState(false);
@@ -107,6 +113,28 @@ export function SettingsModal({
                 className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${isSoundEnabled ? "bg-[var(--violet-500)]" : "bg-[var(--slate-300)]"}`}
               >
                 <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${isSoundEnabled ? "translate-x-5" : "translate-x-0"}`} />
+              </div>
+            </button>
+
+            {/* Klavye Türü Toggle */}
+            <button
+              onClick={onNativeKeyboardToggle}
+              className="w-full flex items-center justify-between px-6 py-4 hover:bg-[var(--slate-50)] transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--slate-400)]">
+                  <rect width="20" height="14" x="2" y="5" rx="2"/>
+                  <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/>
+                </svg>
+                <div className="flex flex-col items-start">
+                  <span className="text-[var(--text-primary)]">Sistem klavyesi</span>
+                  <span className="text-[var(--text-muted)] text-xs">Telefon klavyesini kullan</span>
+                </div>
+              </div>
+              <div
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${useNativeKeyboard ? "bg-[var(--violet-500)]" : "bg-[var(--slate-300)]"}`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${useNativeKeyboard ? "translate-x-5" : "translate-x-0"}`} />
               </div>
             </button>
 
