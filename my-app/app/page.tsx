@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabase";
 import CryptoJS from "crypto-js";
 import { saveScoreAction, getUserStatsAction } from "./actions";
-import { Question, LeaderboardRow, UserStats, AnswerStatus, SettingsTab } from "../types";
+import { Question, LeaderboardRow, UserStats, AnswerStatus } from "../types";
 import { playSound, getOrCreateUserId, formatTime, getTurkeyDateStr, getTurkeyFormattedDate } from "../lib/utils";
 import { NextGameTimer } from "./_components/NextGameTimer";
 import { VirtualKeyboard } from "./_components/VirtualKeyboard";
@@ -83,12 +83,12 @@ export default function GamePage() {
   
   /** Ayarlar modalı açık mı? */
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  /** Ayarlar modalındaki aktif sekme */
-  const [settingsTab, setSettingsTab] = useState<SettingsTab>("nasil");
   /** Ses efektleri açık mı? */
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   /** Nasıl Oynanır modalı açık mı? (giriş ekranında) */
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+  /** Nasıl Oynanır modalı açık mı? (oyun ekranında) */
+  const [showHowToPlayGame, setShowHowToPlayGame] = useState(false);
   /** Sistem (native) klavye kullanılsın mı? (false = sanal klavye) */
   const [useNativeKeyboard, setUseNativeKeyboard] = useState(false);
 
@@ -853,6 +853,36 @@ export default function GamePage() {
             onNativeKeyboardToggle={() => setUseNativeKeyboard((p) => !p)}
           />
 
+          {/* Nasıl Oynanır Modalı (Oyun Ekranı) */}
+          {showHowToPlayGame && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-sm"
+              onClick={() => setShowHowToPlayGame(false)}
+            >
+              <div
+                className="bg-[var(--card)] rounded-2xl w-full max-w-md shadow-xl border border-[var(--card-border)] relative max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[var(--card-border)]">
+                  <h3 className="text-xl font-black text-[var(--text-primary)]">Nasıl Oynanır?</h3>
+                  <button
+                    onClick={() => setShowHowToPlayGame(false)}
+                    className="p-1.5 rounded-lg text-[var(--slate-400)] hover:text-[var(--slate-600)] hover:bg-[var(--slate-100)] active:scale-95 transition-all"
+                    aria-label="Kapat"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <div className="p-6">
+                  <HowToPlayContent />
+                </div>
+              </div>
+            </div>
+          )}
+
           {showGameOverModal && (
             <GameOverModal
               score={score}
@@ -871,17 +901,18 @@ export default function GamePage() {
             className={`fixed top-0 left-0 w-full z-40 pt-2 sm:pt-4 flex justify-center pointer-events-none transition-all duration-300 ${isAnswering ? 'max-sm:opacity-0 max-sm:-translate-y-full max-sm:pointer-events-none' : 'max-sm:opacity-100 max-sm:translate-y-0'}`}
           >
             <div className="w-full max-w-4xl px-4 flex justify-center">
-              <header className={`pointer-events-auto w-full bg-[var(--card)]/90 backdrop-blur-md shadow-md shadow-[var(--slate-200)]/50 border border-[var(--slate-200)] rounded-2xl px-2 py-2 sm:px-3 flex items-center justify-between gap-1 sm:gap-4 transition-all duration-300 ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''}`}>
-                {/* Sol: Ayarlar Butonu */}
+              <header className={`pointer-events-auto w-full bg-[var(--card)]/90 backdrop-blur-md shadow-md shadow-[var(--slate-200)]/50 border border-[var(--slate-200)] rounded-2xl px-2 py-2 sm:px-3 flex items-center justify-between gap-1 sm:gap-4 transition-all duration-300 ${(showGameOverModal || showSettingsModal || showHowToPlayGame) ? 'blur-sm' : ''}`}>
+                {/* Sol: Nasıl Oynanır Butonu */}
                 <div className="flex-1 flex justify-start shrink-0">
                   <button
-                    onClick={() => setShowSettingsModal(true)}
-                    aria-label="Ayarlar"
+                    onClick={() => setShowHowToPlayGame(true)}
+                    aria-label="Nasıl Oynanır"
                     className="p-2 rounded-xl text-[var(--slate-400)] hover:text-[var(--violet-600)] hover:bg-[var(--violet-50)] active:scale-95 transition-all"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-                      <circle cx="12" cy="12" r="3"/>
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 16v-4"/>
+                      <path d="M12 8h.01"/>
                     </svg>
                   </button>
                 </div>
@@ -893,14 +924,25 @@ export default function GamePage() {
                   </h1>
                 </div>
 
-                {/* Sağ: Boş (Puan kart içine taşındı) */}
-                <div className="flex-1 flex justify-end shrink-0"></div>
+                {/* Sağ: Ayarlar Butonu */}
+                <div className="flex-1 flex justify-end shrink-0">
+                  <button
+                    onClick={() => setShowSettingsModal(true)}
+                    aria-label="Ayarlar"
+                    className="p-2 rounded-xl text-[var(--slate-400)] hover:text-[var(--violet-600)] hover:bg-[var(--violet-50)] active:scale-95 transition-all"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </button>
+                </div>
               </header>
             </div>
           </div>
 
           <main 
-            className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pt-28 sm:pt-36 pb-20 ${isAnswering ? 'max-sm:pt-20 max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal) ? 'blur-sm' : ''} touch-manipulation transition-all duration-300`}
+            className={`flex-1 w-full max-w-4xl mx-auto px-4 flex flex-col justify-center pt-28 sm:pt-36 pb-20 ${isAnswering ? 'max-sm:pt-20 max-sm:pb-64' : ''} ${(showGameOverModal || showSettingsModal || showHowToPlayGame) ? 'blur-sm' : ''} touch-manipulation transition-all duration-300`}
             style={{
               transform: isAnswering && keyboardHeight > 0 ? `translateY(-${Math.min(keyboardHeight * 0.2, 60)}px)` : undefined,
               transition: 'transform 0.3s ease-out'
