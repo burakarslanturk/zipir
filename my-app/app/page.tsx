@@ -929,7 +929,7 @@ export default function GamePage() {
                 )}
                 
                 {/* Sağ: Puan */}
-                <div className="flex items-center gap-2 text-[var(--slate-600)] font-medium">
+                <div className="flex items-center gap-2 text-[var(--slate-600)] font-semibold">
                   <span>Puan:</span>
                   <span className={`text-[var(--violet-700)] font-bold text-lg sm:text-xl transition-transform duration-300 ${isScoreAnimating ? 'scale-[1.3]' : 'scale-100'}`}>{score}</span>
                 </div>
@@ -940,8 +940,16 @@ export default function GamePage() {
                 Bu Sorunun Değeri: {currentPotentialScore} Puan
               </div>
 
+              {/* Soru Sayısı - Soru Metni Üstünde */}
+              <div className="mt-6 mb-3 w-full flex justify-center items-center gap-2 text-[var(--slate-600)] font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--slate-400)]">
+                  <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span>Soru: <strong className="text-[var(--slate-700)] ml-1">{currentQuestionIndex + 1} / {questions.length}</strong></span>
+              </div>
+
               {/* Soru / İpucu Metni */}
-              <div className="mt-8 mb-10 w-full text-center">
+              <div className="mb-10 w-full text-center">
                 <h2 className="text-xl sm:text-2xl font-sans text-[var(--slate-700)] leading-relaxed max-w-2xl mx-auto">
                   {currentQuestion.clue}
                 </h2>
