@@ -893,14 +893,8 @@ export default function GamePage() {
                   </h1>
                 </div>
 
-                {/* Sağ: Puan */}
-                <div className="flex-1 flex justify-end shrink-0">
-                  <div className="flex items-center py-1.5 px-3 sm:py-2 sm:px-4 bg-[var(--violet-100)]/60 border border-[var(--violet-200)] rounded-xl">
-                    <div className="text-sm sm:text-base font-semibold text-[var(--slate-600)] flex items-center">
-                      Puan: <span className={`text-[var(--violet-700)] font-bold text-base sm:text-xl ml-1 sm:ml-1.5 transition-transform duration-300 ${isScoreAnimating ? 'scale-[1.3]' : 'scale-100'}`}>{score}</span>
-                    </div>
-                  </div>
-                </div>
+                {/* Sağ: Boş (Puan kart içine taşındı) */}
+                <div className="flex-1 flex justify-end shrink-0"></div>
               </header>
             </div>
           </div>
@@ -914,16 +908,17 @@ export default function GamePage() {
           >
             <div className="bg-[var(--card)] rounded-2xl shadow-xl shadow-[var(--slate-200)]/50 border border-[var(--slate-200)] p-6 sm:p-10 flex flex-col items-center relative">
               
-              {/* Kart İçi Üst Bilgi Satırı: Soru Sayısı ve Süre */}
+              {/* Kart İçi Üst Bilgi Satırı: Süre ve Puan */}
               <div className="flex flex-wrap sm:flex-nowrap justify-between items-center w-full mb-6 pb-3 border-b border-[var(--slate-100)] relative">
-                <div className="flex items-center gap-2 text-[var(--slate-600)] font-medium">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--slate-400)]">
-                    <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                {/* Sol: Süre */}
+                <div className={`flex items-center gap-2 font-mono text-lg sm:text-xl ${timeLeft <= 30 ? "text-[var(--red-500)] font-bold animate-pulse scale-105 transition-transform" : "text-[var(--slate-700)] font-bold"}`}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${timeLeft <= 30 ? "text-[var(--red-500)]" : "text-[var(--slate-400)]"}`}>
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                   </svg>
-                  <span>Soru: <strong className="text-[var(--slate-700)] ml-1">{currentQuestionIndex + 1} / {questions.length}</strong></span>
+                  <span className="w-14">{formatTime(timeLeft)}</span>
                 </div>
                 
-                {/* 30 Saniyelik Cevaplama Süresi - Soru ve Ana Süre Arasında */}
+                {/* 30 Saniyelik Cevaplama Süresi - Ortada */}
                 {isAnswering && (
                   <div className="w-full flex justify-center order-last mt-4 sm:w-auto sm:order-none sm:mt-0 sm:absolute sm:left-1/2 sm:-translate-x-1/2 bg-[var(--red-50)] text-[var(--red-600)] border border-[var(--red-200)] px-3 py-1 rounded-full font-bold text-sm items-center gap-1.5 shadow-sm animate-pulse whitespace-nowrap">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--red-500)]">
@@ -933,11 +928,10 @@ export default function GamePage() {
                   </div>
                 )}
                 
-                <div className={`flex items-center gap-2 font-mono text-lg sm:text-xl ${timeLeft <= 30 ? "text-[var(--red-500)] font-bold animate-pulse scale-105 transition-transform" : "text-[var(--slate-700)] font-bold"}`}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`${timeLeft <= 30 ? "text-[var(--red-500)]" : "text-[var(--slate-400)]"}`}>
-                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                  </svg>
-                  <span className="w-14 text-right">{formatTime(timeLeft)}</span>
+                {/* Sağ: Puan */}
+                <div className="flex items-center gap-2 text-[var(--slate-600)] font-medium">
+                  <span>Puan:</span>
+                  <span className={`text-[var(--violet-700)] font-bold text-lg sm:text-xl transition-transform duration-300 ${isScoreAnimating ? 'scale-[1.3]' : 'scale-100'}`}>{score}</span>
                 </div>
               </div>
               
